@@ -81,9 +81,10 @@ input {
     border:1px solid black;
     display: flex;
     align-items: center;
-    margin-top: 10px;
     padding:12px;
-    width: 600px;
+    width: 100%;
+    min-width: 200px;
+    /* margin-bottom: 0.5em; */
 }
 
 .input-box img{
@@ -106,6 +107,74 @@ input {
     outline: 0;
 }
 
+/* search styling =========================================================== */
+
+#auto-box {
+    /* max-width: 110%; */
+    /* margin-left: 3px; */
+    /* background-color: white; */
+    box-shadow: 0 3px 10px #ccc;
+    position: absolute;
+    width: 475px;
+}
+
+#auto-box li {
+    list-style: none;
+    padding: 10px 16px;
+    font-family: "DM Sans", sans-serif;
+    background-color: white;
+    display: none;
+}
+
+#search-box.active #auto-box li{
+    display: block;
+}
+
+#auto-box li:hover{
+    background-color: #FFCEDF;
+    cursor: pointer;
+}
+
+#search-box {
+    /* display: block; */
+    width: 100%;
+    /* background-color: white; */
+}
+
+/* dislikes filter styling ================================================== */
+
+#dis-auto-box {
+    /* max-width: 110%; */
+    /* margin-left: 3px; */
+    /* background-color: white; */
+    box-shadow: 0 3px 10px #ccc;
+    position: absolute;
+    width: 475px;
+}
+
+#dis-auto-box li {
+    list-style: none;
+    padding: 10px 16px;
+    font-family: "DM Sans", sans-serif;
+    background-color: white;
+    display: none;
+}
+
+#dis-search-box.active #dis-auto-box li{
+    display: block;
+}
+
+#dis-auto-box li:hover{
+    background-color: #FFCEDF;
+    cursor: pointer;
+}
+
+#dis-search-box {
+    /* display: block; */
+    width: 100%;
+    /* background-color: white; */
+}
+
 #answer-box{
     width: 700px;
     margin-top:50px; 
@@ -118,29 +187,25 @@ input {
 .episode-desc{
     font-family: 'DM Sans', sans-serif;
 }
-/* 
-.home-box {
-    display: flex;
-    justify-content: left;
-    align-items: left;
-    margin-top: 1em;
-} */
 
 .filter-box {
     color: #000000;
     display: flex;
     justify-content: left;
     width: 40%;
+    /* width: 600px; */
     align-items: flex-start;
     text-align: left;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
     flex-direction: column;
+    min-width: 450px;
 }
 
 .filter-item {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
+    width: 100%;
 }
 
 .filter-title {
@@ -149,15 +214,39 @@ input {
     font-weight: 600;
     font-size: 24px;
     margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.25em;
     text-align: left;
+}
+
+.filter-input-box {
+    margin-top: 1em;
+    border-radius: 50px;
+    border:1px solid black;
+    display: flex;
+    align-items: flex-start;
+    padding:8px;
+    width: 100%;
+    min-width: 200px;
+}
+
+.filter-input-box img{
+    height: 20px;
+    width:20px;
+}
+
+.filter-input-box input{
+    background-color: #FFECF3;
+    width: 100%;
+    margin-left: 10px;
+    font-size: 16px;
+    border: none;
+    outline: 0;
 }
 
 /* buttons ===================================================================*/
 
 .add-button {
     background-color: #FFCEDF;
-    /* border-radius: 4%; */
     border: none;
     color: black;
     padding: 12px 24px;
@@ -167,6 +256,11 @@ input {
     font-size: 16px;
     border-radius: 8px;
     margin-top: 1em;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background-color: #FFA0C2;
 }
 
 .submit-button {
@@ -180,6 +274,11 @@ input {
     font-size: 16px;
     border-radius: 8px;
     margin-top: 1em;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #F64182;
 }
 
 /* slider styling ============================================================*/
@@ -195,15 +294,7 @@ input {
 }
 
 #slider-range .ui-widget-content {
-    /* height: 5px; */
     background: white;
-    /* border-radius: 50%;
-    border: none; */
-    /* top: 1em;
-    left: 5%; */
-    /* height: .1em; */
-    /* width: 90%;
-    border: none; */
 }
 
 #slider-range .ui-widget-header {
