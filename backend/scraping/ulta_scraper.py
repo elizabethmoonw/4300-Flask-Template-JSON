@@ -305,7 +305,8 @@ def scrape_product(link_name, link, category):
     options.add_argument("--ignore-certificate-errors-spki-list")
     options.add_argument("--ignore-ssl-errors")
 
-    driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+    driver = webdriver.Chrome(
+        ChromeDriverManager().install(), chrome_options=options)
     driver.maximize_window()
     driver.get(link)
 
@@ -371,7 +372,10 @@ def main():
     print(product_links)
     for c in product_links:
         for p in product_links[c]:
-            scrape_product(p, product_links[c][p], c)
+            try:
+                scrape_product(p, product_links[c][p], c)
+            except exceptions.StaleElementReferenceException:
+                scrape_product(p, product_links[c][p], c)
 
 
 if __name__ == "__main__":
