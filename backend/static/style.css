@@ -116,6 +116,7 @@ input {
     box-shadow: 0 3px 10px #ccc;
     position: absolute;
     width: 475px;
+    z-index: 1000;
 }
 
 #auto-box li {
@@ -282,6 +283,10 @@ input {
 }
 
 /* slider styling ============================================================*/
+
+.slider-range {
+    z-index: 100;
+}
 
 #slider-range .ui-slider-range {
     background: transparent;
