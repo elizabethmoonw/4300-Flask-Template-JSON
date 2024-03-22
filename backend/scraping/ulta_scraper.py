@@ -295,9 +295,9 @@ def scrape_product(link_name, link, category):
 
 
 def main():
-    # already scraped: 'foundation', 'face-powder', 'concealer'
-    categories = {'face': ['face-primer']}
-    #   'bb-cc-creams', 'blush', 'bronzer', 'contouring', 'highlighter']}
+    # already scraped: 'foundation', 'face-powder', 'concealer', 'face-primer', 'bb-cc-creams', 'blush'
+    categories = {'face': ['bronzer']}
+    #   , , , 'contouring', 'highlighter']}
 
     # after installing all libraries, run "python3 ulta_scraper.py"
     # remaining products- must be in dictionary form, and change lines 244 and 250 to
@@ -311,7 +311,10 @@ def main():
     print(product_links)
     for c in product_links:
         for p in product_links[c]:
-            scrape_product(p, product_links[c][p], c)
+            try:
+                scrape_product(p, product_links[c][p], c)
+            except exceptions.StaleElementReferenceException:
+                scrape_product(p, product_links[c][p], c)
 
 
 if __name__ == "__main__":
