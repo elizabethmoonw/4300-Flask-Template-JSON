@@ -100,8 +100,4 @@ df_tokenized = df_cleaned["ingredients"].apply(
     lambda x: tokenize(x) if isinstance(x, str) else []
 )
 
-print(df_tokenized)
-
-df_tokenized.to_csv(
-    os.path.join(DATASET_DIR, "clean_dataset.csv"), encoding="utf-8-sig", index=False
-)
+df_tokenized.to_json(os.path.join(DATASET_DIR, "clean_dataset.json"))
