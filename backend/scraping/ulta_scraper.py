@@ -355,9 +355,9 @@ def scrape_product(link_name, link, category):
 
 
 def main():
-    # already scraped: 'foundation', 'face-powder', 'concealer'
-    categories = {"face": ["face-primer"]}
-    #   'bb-cc-creams', 'blush', 'bronzer', 'contouring', 'highlighter']}
+    # already scraped: 'foundation', 'face-powder', 'concealer', 'face-primer', bb-cc-creams', 'blush', 'bronzer', 'contouring'
+    categories = {"face": ['highlighter']}
+    #   ' , ]}
 
     # after installing all libraries, run "python3 ulta_scraper.py"
     # remaining products- must be in dictionary form, and change lines 244 and 250 to
