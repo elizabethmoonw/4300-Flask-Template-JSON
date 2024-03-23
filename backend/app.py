@@ -15,11 +15,15 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # Specify the path to the JSON file relative to the current script
 json_file_path = os.path.join(current_directory, "init.json")
 
+eyes_csv_path = os.path.join(current_directory, "scraping/face_ulta_data.csv")
+
 # Assuming your JSON data is stored in a file named 'init.json'
 with open(json_file_path, "r") as file:
     data = json.load(file)
     episodes_df = pd.DataFrame(data["episodes"])
     reviews_df = pd.DataFrame(data["reviews"])
+
+eyes_df = pd.read_csv(eyes_csv_path)
 
 app = Flask(__name__)
 CORS(app)
@@ -37,6 +41,14 @@ def json_search(query):
     return matches_filtered_json
 
 
+def csv_search(query):
+    matches = []
+    matches = eyes_df[eyes_df["product"].str.lower().str.contains(query.lower())]
+    matches_filtered = matches[["product", "category", "link", "price"]]
+    matches_filtered_json = matches_filtered.to_json(orient="records")
+    return matches_filtered_json
+
+
 @app.route("/")
 def home():
     return render_template("base.html", title="sample html")
@@ -45,7 +57,13 @@ def home():
 @app.route("/episodes")
 def episodes_search():
     text = request.args.get("title")
-    return json_search(text)
+    return csv_search(text)
+
+
+@app.route("/search")
+def searchProducts():
+    text = request.args.get("title")
+    return csv_search(text)
 
 
 if "DB_NAME" not in os.environ:

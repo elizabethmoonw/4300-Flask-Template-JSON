@@ -12,6 +12,7 @@
     align-items: center;
     flex-direction: column;
     overflow: auto;
+    /* flex: 1; */
 }
 
 h1 {
@@ -80,15 +81,20 @@ input {
     border-radius: 50px;
     border:1px solid black;
     display: flex;
+    flex-direction: row;
     align-items: center;
-    margin-top: 10px;
     padding:12px;
-    width: 600px;
+    width: 100%;
+    min-width: 100px;
+    /* margin-bottom: 0.5em; */
+    /* width: 450px; */
+    /* size: auto; */
+    width: auto;
 }
 
 .input-box img{
-    height: 20px;
-    width:20px;
+    height:20px;
+    width: 20px;
 }
 
 .top-text{
@@ -106,6 +112,80 @@ input {
     outline: 0;
 }
 
+/* search styling =========================================================== */
+
+#auto-box {
+    /* max-width: 110%; */
+    /* margin-left: 3px; */
+    /* background-color: white; */
+    /* box-shadow: 0 3px 10px #ccc; */
+    position: absolute;
+    width: 40%;
+    height: 175px;
+    min-width: 450px;
+    overflow: scroll;
+    /* z-index: 1000; */
+}
+
+#auto-box li {
+    list-style: none;
+    padding: 10px 16px;
+    font-family: "DM Sans", sans-serif;
+    background-color: white;
+    display: none;
+}
+
+#search-box.active #auto-box li{
+    display: block;
+    /* width: 100%; */
+}
+
+#auto-box li:hover{
+    background-color: #FFCEDF;
+    cursor: pointer;
+}
+
+#search-box {
+    width: 100%;
+    flex: 1;
+}
+
+/* dislikes filter styling ================================================== */
+
+#dis-auto-box {
+    /* max-width: 110%; */
+    /* margin-left: 3px; */
+    /* background-color: white; */
+    /* box-shadow: 0 3px 10px #ccc; */
+    position: absolute;
+    width: 40%;
+    height: 175px;
+    min-width: 450px;
+    max-height: 300px;
+    overflow: scroll;
+}
+
+#dis-auto-box li {
+    list-style: none;
+    padding: 10px 16px;
+    font-family: "DM Sans", sans-serif;
+    background-color: white;
+    display: none;
+}
+
+#dis-search-box.active #dis-auto-box li{
+    display: block;
+}
+
+#dis-auto-box li:hover{
+    background-color: #FFCEDF;
+    cursor: pointer;
+}
+
+#dis-search-box {
+    width: 100%;
+}
+
 #answer-box{
     width: 700px;
     margin-top:50px; 
@@ -118,29 +198,26 @@ input {
 .episode-desc{
     font-family: 'DM Sans', sans-serif;
 }
-/* 
-.home-box {
-    display: flex;
-    justify-content: left;
-    align-items: left;
-    margin-top: 1em;
-} */
 
 .filter-box {
     color: #000000;
     display: flex;
     justify-content: left;
     width: 40%;
+    /* width: 600px; */
     align-items: flex-start;
     text-align: left;
-    margin-top: 1em;
-    margin-bottom: 1em;
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
     flex-direction: column;
+    min-width: 450px;
+    flex: 1;
 }
 
 .filter-item {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
+    width: 100%;
 }
 
 .filter-title {
@@ -149,15 +226,40 @@ input {
     font-weight: 600;
     font-size: 24px;
     margin-top: 0.5em;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.25em;
     text-align: left;
+}
+
+.filter-input-box {
+    margin-top: 1em;
+    border-radius: 50px;
+    border:1px solid black;
+    display: flex;
+    align-items: flex-start;
+    padding:8px;
+    /* width: 90%; */
+    width: auto;
+    min-width: 150px;
+}
+
+.filter-input-box img{
+    height: 20px;
+    width:20px;
+}
+
+.filter-input-box input{
+    background-color: #FFECF3;
+    width: 100%;
+    margin-left: 10px;
+    font-size: 16px;
+    border: none;
+    outline: 0;
 }
 
 /* buttons ===================================================================*/
 
 .add-button {
     background-color: #FFCEDF;
-    /* border-radius: 4%; */
     border: none;
     color: black;
     padding: 12px 24px;
@@ -167,6 +269,11 @@ input {
     font-size: 16px;
     border-radius: 8px;
     margin-top: 1em;
+    cursor: pointer;
+}
+
+.add-button:hover {
+    background-color: #FFA0C2;
 }
 
 .submit-button {
@@ -180,9 +287,18 @@ input {
     font-size: 16px;
     border-radius: 8px;
     margin-top: 1em;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #F64182;
 }
 
 /* slider styling ============================================================*/
+
+.slider-range {
+    z-index: 100;
+}
 
 #slider-range .ui-slider-range {
     background: transparent;
@@ -195,15 +311,7 @@ input {
 }
 
 #slider-range .ui-widget-content {
-    /* height: 5px; */
     background: white;
-    /* border-radius: 50%;
-    border: none; */
-    /* top: 1em;
-    left: 5%; */
-    /* height: .1em; */
-    /* width: 90%;
-    border: none; */
 }
 
 #slider-range .ui-widget-header {

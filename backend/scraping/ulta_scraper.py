@@ -305,8 +305,7 @@ def scrape_product(link_name, link, category):
     options.add_argument("--ignore-certificate-errors-spki-list")
     options.add_argument("--ignore-ssl-errors")
 
-    driver = webdriver.Chrome(
-        ChromeDriverManager().install(), chrome_options=options)
+    driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
     driver.maximize_window()
     driver.get(link)
 

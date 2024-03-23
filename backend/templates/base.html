@@ -3,27 +3,29 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kanit&family=Montserrat&family=Open+Sans:wght@500&display=swap"
+    rel="stylesheet">
+<link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+    rel="stylesheet">
 <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-<link rel="stylesheet" href="/resources/demos/style.css">
 <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 <script>
-    $( function() {
-      $( "#slider-range" ).slider({
-        range: true,
-        min: 0,
-        max: 150,
-        values: [ 0, 150 ],
-        slide: function( event, ui ) {
-          $( "#amount" ).val( "$" + ui.values[ 0 ] + " - $" + ui.values[ 1 ] );
-        }
-      });
-      $( "#amount" ).val( "$" + $( "#slider-range" ).slider( "values", 0 ) +
-        " - $" + $( "#slider-range" ).slider( "values", 1 ) );
-    } );
-    </script>
+    $(function () {
+        $("#slider-range").slider({
+            range: true,
+            min: 0,
+            max: 150,
+            values: [0, 150],
+            slide: function (event, ui) {
+                $("#amount").val("$" + ui.values[0] + " - $" + ui.values[1]);
+            }
+        });
+        $("#amount").val("$" + $("#slider-range").slider("values", 0) +
+            " - $" + $("#slider-range").slider("values", 1));
+    });
+</script>
 
 <body>
     <div class="full-body-container">
@@ -32,27 +34,40 @@
                 <h1>Lookalike.</h1>
                 <h4>Discover affordable dupes for your favorite makeup products</h4>
             </header>
-            <div class="input-box" onclick="sendFocus()">
-                <img src="{{ url_for('static', filename='images/mag.png') }}" />
-                <input placeholder="Search for a makeup product" id="filter-text-val" onkeyup="filterText()">
-            </div>
         </div>
         <div class="filter-box">
+            <div id="search-box">
+                <div class="input-box">
+                    <img src="{{ url_for('static', filename='images/mag.png') }}" />
+                    <input placeholder="Search for a makeup product" id="prod-search-text" onkeyup="showProducts()">
+                </div>
+                <div id="auto-box" hidden></div>
+            </div>
             <!-- <h3>We want to know more about <i>your</i> taste.</h3> -->
             <div class="filter-item">
                 <p class="filter-title">Ingredient dislikes/allergens</p>
                 <p class="body-text">Allergic to any ingredients? Prefer not to have talc in your powders?</p>
-                <button class="add-button">Add a dislike +</button>
+                <div id="dis-search-box">
+                    <div class="filter-input-box">
+                        <input placeholder="Add a dislike" id="dis-search-text" onkeyup="showDislikes()">
+                    </div>
+                    <div id="dis-auto-box"></div>
+                </div>
+                <!-- <button class="add-button">Add a dislike +</button> -->
             </div>
             <div class="filter-item">
                 <p class="filter-title">Product characteristics</p>
                 <p class="body-text">Want a more waterproof mascara? Foundations for oily skin?</p>
-                <button class="add-button">Add a keyword +</button>
+                <div class="filter-input-box">
+                    <input placeholder="Add a keyword" id="keywords">
+                </div>
+                <!-- <button class="add-button">Add a keyword +</button> -->
             </div>
             <div class="filter-item">
                 <p class="filter-title">Price range</p>
                 <p class="body-text">Let us know what your budget is.</p>
-                <input type="text" id="amount" readonly style="border:0; color:#000000; background-color: #FFECF3; font-size: 20px; margin-top: 0.5em; margin-bottom: 0.5em;">
+                <input type="text" id="amount" readonly
+                    style="border:0; color:#000000; background-color: #FFECF3; font-size: 20px; margin-top: 0.5em; margin-bottom: 0.5em;">
                 <div id="slider-range"></div>
             </div>
         </div>
