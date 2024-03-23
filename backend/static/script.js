@@ -5,6 +5,14 @@ const productInputBox = document.querySelector("#prod-search-text");
 const disSearchBox = document.querySelector("#dis-search-box");
 const disAutoBox = document.querySelector("#dis-auto-box");
 const disInputBox = document.querySelector("#dis-search-text");
+const disChips = document.querySelector("#dis-chips");
+
+const filterSearchBox = document.querySelector("#filter-text");
+const filterInputBox = document.querySelector("#filter-input-box");
+const filterChips = document.querySelector("#keyword-chips");
+
+dislike_chips = [];
+filter_chips = [];
 
 function answerBoxTemplate(product, category, link, price) {
   return `<div class=''>
@@ -93,10 +101,38 @@ async function showProducts() {
 }
 
 function selectDislike(element) {
+  // console.log("selected fskldj");
   let selectUserData = element.textContent;
-  disInputBox.value = selectUserData;
+  if (!dislike_chips.includes(selectUserData)) {
+    dislike_chips.push(selectUserData);
+    var chip = document.createElement("div");
+    chip.classList.add("dis-chip");
+    // chip.addEventListener("click", removeLike);
+    chip_text = document.createElement("span");
+    chip_text.classList.add("chip--text");
+    chip_text.innerHTML = selectUserData;
+    chip.appendChild(chip_text);
+    close_icon = document.createElement("img");
+    close_icon.src = "/static/images/close-x.svg";
+    close_icon.style.height = "16px";
+    close_icon.style.width = "16px";
+    close_icon.style.marginLeft = "8px";
+    close_icon.setAttribute("onclick", "removeDislike(this)");
+    close_icon.style.cursor = "pointer";
+    chip.appendChild(close_icon);
+    disChips.appendChild(chip);
+  }
+  disInputBox.value = "";
   disSearchBox.classList.remove("active");
   disAutoBox.hidden = true;
+}
+
+function removeDislike(element) {
+  // console.log("removing element");
+  dis_index = dislike_chips.indexOf(element.textContent);
+  dislike_chips.splice(dis_index, 1);
+  element.parentNode.remove();
+  // console.log(dislike_chips);
 }
 
 function setDisClickable(list) {
@@ -116,4 +152,39 @@ function showDislikes() {
     disSearchBox.classList.remove("active");
     disAutoBox.hidden = true;
   }
+}
+
+function enterKeyword(e) {
+  console.log("entering keyword");
+  filterSearchBox.classList.add("active");
+  if (e.which == 13) {
+    let selectUserData = filterSearchBox.value;
+    if (!filter_chips.includes(selectUserData) && selectUserData != "") {
+      filter_chips.push(selectUserData);
+      var chip = document.createElement("div");
+      chip.classList.add("keyword-chip");
+      chip_text = document.createElement("span");
+      chip_text.classList.add("chip--text");
+      chip_text.innerHTML = selectUserData;
+      chip.appendChild(chip_text);
+      close_icon = document.createElement("img");
+      close_icon.src = "/static/images/close-x.svg";
+      close_icon.style.height = "16px";
+      close_icon.style.width = "16px";
+      close_icon.style.marginLeft = "8px";
+      close_icon.setAttribute("onclick", "removeFilter(this)");
+      close_icon.style.cursor = "pointer";
+      chip.appendChild(close_icon);
+      filterChips.appendChild(chip);
+    }
+    filterSearchBox.value = "";
+  }
+  console.log(filter_chips);
+}
+
+function removeFilter(element) {
+  // console.log("removing element");
+  filter_index = filter_chips.indexOf(element.textContent);
+  filter_chips.splice(filter_index, 1);
+  element.parentNode.remove();
 }

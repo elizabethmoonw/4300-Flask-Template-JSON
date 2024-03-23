@@ -186,6 +186,26 @@ input {
     width: 100%;
 }
 
+.dis-chips {
+    display: flex;
+    /* flex-wrap: wrap; */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    align-items: flex-start;
+}
+
+.dis-chip {
+    background-color: #FFA0C2;
+    border-radius: 50px;
+    padding: 8px 16px;
+    margin-right: 0.5em;
+    margin-top: 0.5em;
+    display: flex;
+    align-items: center;
+}
+
+/* answer box styling ======================================================== */
+
 #answer-box{
     width: 700px;
     margin-top:50px; 
@@ -198,6 +218,8 @@ input {
 .episode-desc{
     font-family: 'DM Sans', sans-serif;
 }
+
+/* filter styling ============================================================ */
 
 .filter-box {
     color: #000000;
@@ -256,6 +278,24 @@ input {
     outline: 0;
 }
 
+.keyword-chips {
+    display: flex;
+    /* flex-wrap: wrap; */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    align-items: flex-start;
+}
+
+.keyword-chip {
+    background-color: #FFA0C2;
+    border-radius: 50px;
+    padding: 8px 16px;
+    margin-right: 0.5em;
+    margin-top: 0.5em;
+    display: flex;
+    align-items: center;
+}
+
 /* buttons ===================================================================*/
 
 .add-button {
@@ -267,7 +307,8 @@ input {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    border-radius: 8px;
+    /* border-radius: 8px; */
+    border-radius: 50px;
     margin-top: 1em;
     cursor: pointer;
 }
@@ -285,7 +326,8 @@ input {
     text-decoration: none;
     display: inline-block;
     font-size: 16px;
-    border-radius: 8px;
+    /* border-radius: 8px; */
+    border-radius: 50px;
     margin-top: 1em;
     cursor: pointer;
 }

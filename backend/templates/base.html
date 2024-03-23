@@ -51,7 +51,8 @@
                     <div class="filter-input-box">
                         <input placeholder="Add a dislike" id="dis-search-text" onkeyup="showDislikes()">
                     </div>
-                    <div id="dis-auto-box"></div>
+                    <div id="dis-auto-box" hidden></div>
+                    <div id="dis-chips" class="dis-chips"></div>
                 </div>
                 <!-- <button class="add-button">Add a dislike +</button> -->
             </div>
@@ -59,8 +60,9 @@
                 <p class="filter-title">Product characteristics</p>
                 <p class="body-text">Want a more waterproof mascara? Foundations for oily skin?</p>
                 <div class="filter-input-box">
-                    <input placeholder="Add a keyword" id="keywords">
+                    <input placeholder="Add a keyword" id="filter-text" onkeypress="enterKeyword(event)">
                 </div>
+                <div id="keyword-chips" class="keyword-chips"></div>
                 <!-- <button class="add-button">Add a keyword +</button> -->
             </div>
             <div class="filter-item">
