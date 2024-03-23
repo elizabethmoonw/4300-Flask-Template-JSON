@@ -11,15 +11,17 @@ const filterSearchBox = document.querySelector("#filter-text");
 const filterInputBox = document.querySelector("#filter-input-box");
 const filterChips = document.querySelector("#keyword-chips");
 
-dislike_chips = [];
-filter_chips = [];
+const priceSlider = document.querySelector("#amount");
+
+var dislike_chips = [];
+var filter_chips = [];
 
 function answerBoxTemplate(product, category, link, price) {
+  price_formatted = price.toFixed(2);
   return `<div class=''>
       <h3 class='product-name'>${product}</h3>
-      <p class='product-category'>${category}</p>
-      <p class='product-price'>${price}</p>
-      <p class='product-link'>${link}</p>
+      <p class='product-price'>$${price_formatted}</p>
+      <a href=${link} target='_blank'>${link}</a>
   </div>`;
 }
 
@@ -29,7 +31,7 @@ function sendFocus() {
 
 function filterText() {
   document.getElementById("answer-box").innerHTML = "";
-  console.log(document.getElementById("filter-text-val").value);
+  // console.log(document.getElementById("filter-text-val").value);
   fetch(
     "/episodes?" +
       new URLSearchParams({
@@ -77,12 +79,12 @@ async function matchProducts() {
     .then((data) =>
       data.forEach((row) => {
         match += `<li>${row.product}</li>`;
-        console.log(match);
+        // console.log(match);
       })
     );
-  console.log("outside");
-  console.log(match);
-  console.log(document.getElementById("prod-search-text").value);
+  // console.log("outside");
+  // console.log(match);
+  // console.log(document.getElementById("prod-search-text").value);
   return match;
 }
 
@@ -92,6 +94,7 @@ async function showProducts() {
     productAutoBox.hidden = false;
     // productAutoBox.offsetWidth = productSearchBox.offsetWidth + "px";
     productAutoBox.innerHTML = await matchProducts();
+    // console.log(productAutoBox.innerHTML);
     allList = productAutoBox.querySelectorAll("li");
     setProductClickable(allList);
   } else {
@@ -155,7 +158,7 @@ function showDislikes() {
 }
 
 function enterKeyword(e) {
-  console.log("entering keyword");
+  // console.log("entering keyword");
   filterSearchBox.classList.add("active");
   if (e.which == 13) {
     let selectUserData = filterSearchBox.value;
@@ -179,7 +182,7 @@ function enterKeyword(e) {
     }
     filterSearchBox.value = "";
   }
-  console.log(filter_chips);
+  // console.log(filter_chips);
 }
 
 function removeFilter(element) {
@@ -187,4 +190,37 @@ function removeFilter(element) {
   filter_index = filter_chips.indexOf(element.textContent);
   filter_chips.splice(filter_index, 1);
   element.parentNode.remove();
+}
+
+function getResults() {
+  priceTokens = priceSlider.value.split(" ");
+  minPrice = priceTokens[0].slice(1);
+  maxPrice = priceTokens[2].slice(1);
+  product = productInputBox.value;
+  dislikes = dislike_chips;
+  keywords = filter_chips;
+  // console.log(minPrice, maxPrice);
+
+  fetch(
+    "/filter?" +
+      new URLSearchParams({
+        dislikes: dislike_chips,
+        keywords: filter_chips,
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+      }).toString()
+  )
+    .then((response) => response.json())
+    .then((data) =>
+      data.forEach((row) => {
+        let tempDiv = document.createElement("div");
+        tempDiv.innerHTML = answerBoxTemplate(
+          row.product,
+          row.category,
+          row.link,
+          row.price
+        );
+        document.getElementById("answer-box").appendChild(tempDiv);
+      })
+    );
 }
