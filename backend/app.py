@@ -18,10 +18,10 @@ json_file_path = os.path.join(current_directory, "init.json")
 eyes_csv_path = os.path.join(current_directory, "scraping/face_ulta_data.csv")
 
 # Assuming your JSON data is stored in a file named 'init.json'
-with open(json_file_path, "r") as file:
-    data = json.load(file)
-    episodes_df = pd.DataFrame(data["episodes"])
-    reviews_df = pd.DataFrame(data["reviews"])
+# with open(json_file_path, "r") as file:
+#     data = json.load(file)
+#     episodes_df = pd.DataFrame(data["episodes"])
+#     reviews_df = pd.DataFrame(data["reviews"])
 
 eyes_df = pd.read_csv(eyes_csv_path)
 
@@ -30,15 +30,15 @@ CORS(app)
 
 
 # Sample search using json with pandas
-def json_search(query):
-    matches = []
-    merged_df = pd.merge(
-        episodes_df, reviews_df, left_on="id", right_on="id", how="inner"
-    )
-    matches = merged_df[merged_df["title"].str.lower().str.contains(query.lower())]
-    matches_filtered = matches[["title", "descr", "imdb_rating"]]
-    matches_filtered_json = matches_filtered.to_json(orient="records")
-    return matches_filtered_json
+# def json_search(query):
+#     matches = []
+#     merged_df = pd.merge(
+#         episodes_df, reviews_df, left_on="id", right_on="id", how="inner"
+#     )
+#     matches = merged_df[merged_df["title"].str.lower().str.contains(query.lower())]
+#     matches_filtered = matches[["title", "descr", "imdb_rating"]]
+#     matches_filtered_json = matches_filtered.to_json(orient="records")
+#     return matches_filtered_json
 
 
 def csv_search(query):
