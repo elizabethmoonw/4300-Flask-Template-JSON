@@ -86,7 +86,6 @@ def filter_search():
     keywords = request.args.get("keywords")
     input_keywords = [keywords]
     min_price = float(request.args.get("minPrice"))
-    print(str(min_price))
     max_price = float(request.args.get("maxPrice"))
     return results_search(input_keywords[0], min_price, max_price)
 
