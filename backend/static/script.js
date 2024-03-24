@@ -18,14 +18,32 @@ const answerBox = document.querySelector("#answer-box");
 var dislike_chips = [];
 var filter_chips = [];
 
-function answerBoxTemplate(product, link, price, img_link) {
+function answerBoxTemplate(
+  product,
+  link,
+  price,
+  img_link,
+  ingredients,
+  reviews,
+  avg_rating
+) {
   price_formatted = price.toFixed(2);
   return `<div class='answer-item'>
-      <img src=${img_link} class='product-image' style='height: 100px; width:100px; margin-top: 1em'></img>
+      <img src=${img_link} class='product-image' style='height: 150px; width:150px; margin-top: 1em'></img>
       <div class='answer-text'>
         <h3 class='product-name'>${product}</h3>
-        <p class='product-price'>$${price_formatted}</p>
-        <a href=${link} target='_blank'>${link}</a>
+        <div class='product-info'>
+          <div class='product-price'>$${price_formatted}</div>
+          <div class='answer-rating'>
+            <div class='product-price'>${avg_rating.toString()}</div>
+            <img src='/static/images/star.svg' style='height: 12px; width: 12px; margin-left: 0.25em'></img>
+          </div>
+        </div>
+        <a href=${link} target='_blank' class='add-button'>Go to product</a>
+        <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
+        <p class='product-name'><b>Here's what people are saying about this product: </b>${
+          reviews[0]
+        }</h3>
       </div>
   </div>`;
 }
@@ -103,6 +121,24 @@ async function showProducts() {
   }
 }
 
+async function matchDislikes() {
+  var match = "";
+  await fetch(
+    "/dislikes?" +
+      new URLSearchParams({
+        title: document.getElementById("dis-search-text").value,
+      }).toString()
+  )
+    .then((response) => response.json())
+    .then((data) =>
+      data.forEach((row) => {
+        match += `<li>${row.ingredients}</li>`;
+        // console.log(match);
+      })
+    );
+  return match;
+}
+
 function selectDislike(element) {
   // console.log("selected fskldj");
   let selectUserData = element.textContent;
@@ -143,11 +179,12 @@ function setDisClickable(list) {
   }
 }
 
-function showDislikes() {
+async function showDislikes() {
   if (disInputBox.value != "") {
     disSearchBox.classList.add("active");
     disAutoBox.hidden = false;
-    disAutoBox.innerHTML = "<li>Alcohol</li><li>Talc</li>";
+    disAutoBox.innerHTML = await matchDislikes();
+    // disAutoBox.innerHTML = "<li>Alcohol</li><li>Talc</li>";
     allList = disAutoBox.querySelectorAll("li");
     setDisClickable(allList);
   } else {
@@ -191,6 +228,24 @@ function removeFilter(element) {
   element.parentNode.remove();
 }
 
+function formatIngredients(ingredients) {
+  ingred_string = "";
+  for (i = 0; i < 5; i++) {
+    if (i == ingredients.length) {
+      break;
+    }
+    if (i == ingredients.length - 1) {
+      ingred_string += ingredients[i];
+      break;
+    }
+    ingred_string += ingredients[i] + ", ";
+  }
+  if (ingredients.length > 5) {
+    ingred_string += "and " + (ingredients.length - 5) + " more";
+  }
+  return ingred_string;
+}
+
 function getResults() {
   answerBox.innerHTML = "";
   priceTokens = priceSlider.value.split(" ");
@@ -218,7 +273,10 @@ function getResults() {
           row.product,
           row.link,
           row.price,
-          row.img_link
+          row.img_link,
+          formatIngredients(row.ingredients),
+          row.reviews,
+          row.avg_rating
         );
         answerBox.appendChild(tempDiv);
       })

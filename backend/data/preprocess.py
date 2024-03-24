@@ -24,7 +24,10 @@ def clean_ingredients(data, normalization_map=None):
     DataFrame
         The cleaned and normalized DataFrame.
     """
-    non_ingredient_phrases = ["this brand is excluded from most ulta beauty coupons"]
+    non_ingredient_phrases = [
+        "this brand is excluded from most ulta beauty coupons",
+        "are subject to change at the manufacturer's discretion. for the most complete and up-to-date information\", refer to the product packaging",
+    ]
     non_ingredient_words = {
         "active",
         "inactive",

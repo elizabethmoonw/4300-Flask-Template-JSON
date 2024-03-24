@@ -62,6 +62,8 @@ def make_json(csv_list, jsonFilePath):
                             ].split(", ")
                             for i in range(len(shade_rgb)):
                                 shade_rgb[i] = int(shade_rgb[i])
+                        else:
+                            shade_rgb = []
                         shade_tokens = shade[: shade.rindex(", (")].split(", ")
                         shade_name = shade_tokens[0][1:-2]
                         shade_img = shade_tokens[1][1:-1]

@@ -4,6 +4,7 @@ from flask import Flask, render_template, request
 from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
+from sentence_transformers import SentenceTransformer, util
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -14,6 +15,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Specify the path to the JSON file relative to the current script
 json_file_path = os.path.join(current_directory, "init.json")
+ingredient_file_path = os.path.join(current_directory, "dislikes.json")
 
 eyes_csv_path = os.path.join(current_directory, "scraping/face_ulta_data.csv")
 
@@ -27,7 +29,15 @@ with open(json_file_path, "r") as file:
     data = json.load(file)
     df = pd.DataFrame(data["products"])
 
+with open(ingredient_file_path, "r") as file:
+    data = json.load(file)
+    ingredients_df = pd.DataFrame(data)
+
 eyes_df = pd.read_csv(eyes_csv_path)
+
+model = SentenceTransformer("all-MiniLM-L12-v2")
+product_names = df["product"].tolist()
+product_embeddings = model.encode(product_names, convert_to_tensor=True)
 
 app = Flask(__name__)
 CORS(app)
@@ -41,10 +51,18 @@ def json_search(query):
     #     episodes_df, reviews_df, left_on="id", right_on="id", how="inner"
     # )
     # matches = merged_df[merged_df["title"].str.lower().str.contains(query.lower())]
-    matches = df[df["product"].str.lower().str.contains(query.lower())]
-    matches_filtered = matches[["product"]]
-    # print(matches_filtered)
-    matches_filtered_json = matches_filtered.to_json(orient="records")
+    if len(query) < 4:
+        matches = df[df["product"].str.lower().str.contains(query.lower())]
+        matches_filtered = matches[["product"]]
+        matches_filtered_json = matches_filtered.to_json(orient="records")
+        # print(matches_filtered_json)
+    else:
+        query_embedding = model.encode(query, convert_to_tensor=True)
+        results = util.semantic_search(query_embedding, product_embeddings, top_k=10)
+        results = results[0]
+        matches = [product_names[res["corpus_id"]] for res in results]
+        matches_filtered_json = json.dumps([{"product": match} for match in matches])
+        # print(matches_filtered_json)
     return matches_filtered_json
 
 
@@ -63,7 +81,19 @@ def results_search(query, min_price, max_price):
         & (df["price"] >= min_price)
         & (df["price"] <= max_price)
     ]
-    matches_filtered = matches[["product", "link", "price", "img_link"]]
+    matches_filtered = matches[
+        ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
+    ]
+    matches_filtered_json = matches_filtered.to_json(orient="records")
+    return matches_filtered_json
+
+
+def dislike_search(query):
+    matches = []
+    matches = ingredients_df.loc[
+        ingredients_df["ingredients"].str.lower().str.contains(query.lower())
+    ]
+    matches_filtered = matches
     matches_filtered_json = matches_filtered.to_json(orient="records")
     return matches_filtered_json
 
@@ -93,8 +123,13 @@ def filter_search():
 @app.route("/search")
 def searchProducts():
     text = request.args.get("title")
-    # return csv_search(text)
     return json_search(text)
+
+
+@app.route("/dislikes")
+def searchIngredients():
+    text = request.args.get("title")
+    return dislike_search(text)
 
 
 if "DB_NAME" not in os.environ:
