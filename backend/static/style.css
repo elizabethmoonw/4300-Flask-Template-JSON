@@ -218,11 +218,26 @@ input {
     margin-bottom: 1.5em;
     display: flex;
     flex-direction: row;
+    border: 4px dotted #FFA0C2;
+    border-radius: 12px;
+    padding: 1.5em;
 }
 
 .answer-text {
     margin-left: 1.5em;
 
+}
+
+.answer-rating {
+    align-items: center;
+    display: flex;
+    flex-direction: row;
+    margin-left: 1em;
+}
+
+.product-info {
+    display: flex;
+    flex-direction: row;
 }
 
 .episode-title{
