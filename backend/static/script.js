@@ -103,6 +103,24 @@ async function showProducts() {
   }
 }
 
+async function matchDislikes() {
+  var match = "";
+  await fetch(
+    "/dislikes?" +
+      new URLSearchParams({
+        title: document.getElementById("dis-search-text").value,
+      }).toString()
+  )
+    .then((response) => response.json())
+    .then((data) =>
+      data.forEach((row) => {
+        match += `<li>${row.ingredients}</li>`;
+        // console.log(match);
+      })
+    );
+  return match;
+}
+
 function selectDislike(element) {
   // console.log("selected fskldj");
   let selectUserData = element.textContent;
@@ -143,11 +161,12 @@ function setDisClickable(list) {
   }
 }
 
-function showDislikes() {
+async function showDislikes() {
   if (disInputBox.value != "") {
     disSearchBox.classList.add("active");
     disAutoBox.hidden = false;
-    disAutoBox.innerHTML = "<li>Alcohol</li><li>Talc</li>";
+    disAutoBox.innerHTML = await matchDislikes();
+    // disAutoBox.innerHTML = "<li>Alcohol</li><li>Talc</li>";
     allList = disAutoBox.querySelectorAll("li");
     setDisClickable(allList);
   } else {

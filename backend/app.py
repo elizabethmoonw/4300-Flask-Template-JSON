@@ -14,6 +14,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 
 # Specify the path to the JSON file relative to the current script
 json_file_path = os.path.join(current_directory, "init.json")
+ingredient_file_path = os.path.join(current_directory, "dislikes.json")
 
 eyes_csv_path = os.path.join(current_directory, "scraping/face_ulta_data.csv")
 
@@ -26,6 +27,10 @@ eyes_csv_path = os.path.join(current_directory, "scraping/face_ulta_data.csv")
 with open(json_file_path, "r") as file:
     data = json.load(file)
     df = pd.DataFrame(data["products"])
+
+with open(ingredient_file_path, "r") as file:
+    data = json.load(file)
+    ingredients_df = pd.DataFrame(data)
 
 eyes_df = pd.read_csv(eyes_csv_path)
 
@@ -45,6 +50,7 @@ def json_search(query):
     matches_filtered = matches[["product"]]
     # print(matches_filtered)
     matches_filtered_json = matches_filtered.to_json(orient="records")
+    print(matches_filtered_json)
     return matches_filtered_json
 
 
@@ -65,6 +71,31 @@ def results_search(query, min_price, max_price):
     ]
     matches_filtered = matches[["product", "link", "price", "img_link"]]
     matches_filtered_json = matches_filtered.to_json(orient="records")
+    # print(matches_filtered_json)
+    return matches_filtered_json
+
+
+def dislike_search(query):
+    matches = []
+    # print(df)
+    # merged_df = pd.merge(
+    #     episodes_df, reviews_df, left_on="id", right_on="id", how="inner"
+    # )
+    # matches = merged_df[merged_df["title"].str.lower().str.contains(query.lower())]
+    print(ingredients_df)
+    matches = ingredients_df.loc[
+        ingredients_df["ingredients"].str.lower().str.contains(query.lower())
+    ]
+    # matches = [
+    #     ingred
+    #     for i, ingred in ingredients_df.items()
+    #     if ingred.lower().contains(query.lower())
+    # ]
+    # matches_filtered = matches[["ingredient"]]
+    matches_filtered = matches
+    # print(matches_filtered)
+    matches_filtered_json = matches_filtered.to_json(orient="records")
+    print(matches_filtered_json)
     return matches_filtered_json
 
 
@@ -95,6 +126,13 @@ def searchProducts():
     text = request.args.get("title")
     # return csv_search(text)
     return json_search(text)
+
+
+@app.route("/dislikes")
+def searchIngredients():
+    text = request.args.get("title")
+    # return csv_search(text)
+    return dislike_search(text)
 
 
 if "DB_NAME" not in os.environ:
