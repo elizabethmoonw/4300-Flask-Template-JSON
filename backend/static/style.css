@@ -238,6 +238,11 @@ input {
 .product-info {
     display: flex;
     flex-direction: row;
+    /* height: 24px; */
+}
+
+.product-price {
+    display: inline;
 }
 
 .episode-title{

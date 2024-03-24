@@ -33,13 +33,13 @@ function answerBoxTemplate(
       <div class='answer-text'>
         <h3 class='product-name'>${product}</h3>
         <div class='product-info'>
-          <p class='product-price'>$${price_formatted}</p>
+          <div class='product-price'>$${price_formatted}</div>
           <div class='answer-rating'>
-            <p class='product-price'>${avg_rating.toString()}</p>
+            <div class='product-price'>${avg_rating.toString()}</div>
             <img src='/static/images/star.svg' style='height: 12px; width: 12px; margin-left: 0.25em'></img>
           </div>
         </div>
-        <a href=${link} target='_blank'>Product link</a>
+        <a href=${link} target='_blank' class='add-button'>Go to product</a>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
         <p class='product-name'><b>Here's what people are saying about this product: </b>${
           reviews[0]
