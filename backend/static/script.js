@@ -13,15 +13,20 @@ const filterChips = document.querySelector("#keyword-chips");
 
 const priceSlider = document.querySelector("#amount");
 
+const answerBox = document.querySelector("#answer-box");
+
 var dislike_chips = [];
 var filter_chips = [];
 
-function answerBoxTemplate(product, category, link, price) {
+function answerBoxTemplate(product, link, price, img_link) {
   price_formatted = price.toFixed(2);
-  return `<div class=''>
-      <h3 class='product-name'>${product}</h3>
-      <p class='product-price'>$${price_formatted}</p>
-      <a href=${link} target='_blank'>${link}</a>
+  return `<div class='answer-item'>
+      <img src=${img_link} class='product-image' style='height: 100px; width:100px; margin-top: 1em'></img>
+      <div class='answer-text'>
+        <h3 class='product-name'>${product}</h3>
+        <p class='product-price'>$${price_formatted}</p>
+        <a href=${link} target='_blank'>${link}</a>
+      </div>
   </div>`;
 }
 
@@ -44,9 +49,9 @@ function filterText() {
         let tempDiv = document.createElement("div");
         tempDiv.innerHTML = answerBoxTemplate(
           row.product,
-          row.category,
           row.link,
-          row.price
+          row.price,
+          row.img_link
         );
         document.getElementById("answer-box").appendChild(tempDiv);
       })
@@ -82,9 +87,6 @@ async function matchProducts() {
         // console.log(match);
       })
     );
-  // console.log("outside");
-  // console.log(match);
-  // console.log(document.getElementById("prod-search-text").value);
   return match;
 }
 
@@ -92,9 +94,7 @@ async function showProducts() {
   if (productInputBox.value != "") {
     productSearchBox.classList.add("active");
     productAutoBox.hidden = false;
-    // productAutoBox.offsetWidth = productSearchBox.offsetWidth + "px";
     productAutoBox.innerHTML = await matchProducts();
-    // console.log(productAutoBox.innerHTML);
     allList = productAutoBox.querySelectorAll("li");
     setProductClickable(allList);
   } else {
@@ -110,7 +110,6 @@ function selectDislike(element) {
     dislike_chips.push(selectUserData);
     var chip = document.createElement("div");
     chip.classList.add("dis-chip");
-    // chip.addEventListener("click", removeLike);
     chip_text = document.createElement("span");
     chip_text.classList.add("chip--text");
     chip_text.innerHTML = selectUserData;
@@ -193,17 +192,18 @@ function removeFilter(element) {
 }
 
 function getResults() {
+  answerBox.innerHTML = "";
   priceTokens = priceSlider.value.split(" ");
   minPrice = priceTokens[0].slice(1);
   maxPrice = priceTokens[2].slice(1);
   product = productInputBox.value;
   dislikes = dislike_chips;
   keywords = filter_chips;
-  // console.log(minPrice, maxPrice);
 
   fetch(
     "/filter?" +
       new URLSearchParams({
+        product: product,
         dislikes: dislike_chips,
         keywords: filter_chips,
         minPrice: minPrice,
@@ -216,11 +216,11 @@ function getResults() {
         let tempDiv = document.createElement("div");
         tempDiv.innerHTML = answerBoxTemplate(
           row.product,
-          row.category,
           row.link,
-          row.price
+          row.price,
+          row.img_link
         );
-        document.getElementById("answer-box").appendChild(tempDiv);
+        answerBox.appendChild(tempDiv);
       })
     );
 }

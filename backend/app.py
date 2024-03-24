@@ -56,10 +56,14 @@ def csv_search(query):
     return matches_filtered_json
 
 
-def results_search(query):
+def results_search(query, min_price, max_price):
     matches = []
-    matches = df[df["product"].str.lower().str.contains(query.lower())]
-    matches_filtered = matches[["product", "link", "price"]]
+    matches = df[
+        (df["product"].str.lower().str.contains(query.lower()))
+        & (df["price"] >= min_price)
+        & (df["price"] <= max_price)
+    ]
+    matches_filtered = matches[["product", "link", "price", "img_link"]]
     matches_filtered_json = matches_filtered.to_json(orient="records")
     return matches_filtered_json
 
@@ -81,7 +85,10 @@ def filter_search():
     input_dislikes = [dislikes]
     keywords = request.args.get("keywords")
     input_keywords = [keywords]
-    return results_search(input_keywords[0])
+    min_price = float(request.args.get("minPrice"))
+    print(str(min_price))
+    max_price = float(request.args.get("maxPrice"))
+    return results_search(input_keywords[0], min_price, max_price)
 
 
 @app.route("/search")

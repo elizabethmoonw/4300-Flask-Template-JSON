@@ -207,8 +207,22 @@ input {
 /* answer box styling ======================================================== */
 
 #answer-box{
-    width: 700px;
+    max-width: 700px;
+    /* width: 700px; */
     margin-top:50px; 
+    display: flex;
+    flex-direction: column;
+}
+
+.answer-item {
+    margin-bottom: 1.5em;
+    display: flex;
+    flex-direction: row;
+}
+
+.answer-text {
+    margin-left: 1.5em;
+
 }
 
 .episode-title{
@@ -225,6 +239,7 @@ input {
     color: #000000;
     display: flex;
     justify-content: left;
+    /* max-width: 800px; */
     width: 40%;
     /* width: 600px; */
     align-items: flex-start;
