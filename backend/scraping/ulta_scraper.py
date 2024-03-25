@@ -289,13 +289,13 @@ def get_reviews(driver):
 
 
 def add_to_csv(details):
-    with open("face_ulta_data.csv", "a", newline="", encoding="utf-8") as f:
+    with open("lips_ulta_data.csv", "a", newline="", encoding="utf-8") as f:
         write = csv.writer(f)
         write.writerow(details)
 
 
 def scrape_product(link_name, link, category):
-    with open("face_ulta_data.csv", "rt", encoding="utf-8") as f:
+    with open("lips_ulta_data.csv", "rt", encoding="utf-8") as f:
         reader = csv.reader(f, delimiter=",")
         for row in reader:
             if link_name == row[2]:
@@ -305,7 +305,8 @@ def scrape_product(link_name, link, category):
     options.add_argument("--ignore-certificate-errors-spki-list")
     options.add_argument("--ignore-ssl-errors")
 
-    driver = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+    driver = webdriver.Chrome(
+        ChromeDriverManager().install(), chrome_options=options)
     driver.maximize_window()
     driver.get(link)
 
@@ -355,9 +356,11 @@ def scrape_product(link_name, link, category):
 
 
 def main():
-    # already scraped: 'foundation', 'face-powder', 'concealer', 'face-primer', bb-cc-creams', 'blush', 'bronzer', 'contouring'
-    categories = {"face": ['highlighter']}
-    #   ' , ]}
+    # already scraped:
+    categories = {"face": ['foundation', 'face-powder', 'concealer', 'face-primer',
+                           'bb-cc-creams', 'blush', 'bronzer', 'contouring', 'highlighter'],
+                  'lips': ['lipstick', 'lip-gloss', 'lip-oil', 'lip-liner', 'lip-stain',
+                           'lip-balms-treatments']}
 
     # after installing all libraries, run "python3 ulta_scraper.py"
     # remaining products- must be in dictionary form, and change lines 244 and 250 to
@@ -365,7 +368,7 @@ def main():
     # i've been going one product type at a time to make it easier to restart (only face-primer, for example),
     # there are sometimes still problems but just rerun
 
-    #   'lips': ['lipstick', 'lip-gloss', 'lip-oil', 'lip-liner', 'lip-stain', 'lip-balms-treatments'],
+    #   ,
     #   'eyes': ['eyeshadow-palettes', 'mascara', 'eyeliner', 'eyebrows', 'eyeshadow']}
     product_links = get_links(categories)
     print(product_links)
