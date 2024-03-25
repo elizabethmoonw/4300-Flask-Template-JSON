@@ -25,6 +25,7 @@ def filter_ingredients(ingred_list):
             and "when in rome" not in x
             and "\u202d" not in x
             and "\u00e9" not in x
+            and "may contain" not in x
             and "styrene/acrylates copolymer propylene glycol laureth-21 pentylene"
             not in x
             and not x.startswith("(")
@@ -114,7 +115,7 @@ def make_json(csv_list, jsonFilePath):
     for csvFilePath in csv_list:
         # create a dictionary
         # Open a csv reader called DictReader
-        with open(csvFilePath, encoding="utf-8") as csvf:
+        with open(csvFilePath, encoding="latin-1") as csvf:
             csvReader = csv.DictReader(csvf)
 
             # Convert each row into a dictionary
@@ -124,7 +125,10 @@ def make_json(csv_list, jsonFilePath):
                 new_rows["id"] = i
                 new_rows.update(rows)
 
-                if csvFilePath == "face_ulta_data.csv":
+                if (
+                    csvFilePath == "face_ulta_data.csv"
+                    or csvFilePath == "lips_ulta_data.csv"
+                ):
                     new_rows["product"] = rows["brand"] + " " + rows["product"]
 
                 # price
@@ -210,6 +214,9 @@ def make_json(csv_list, jsonFilePath):
                 #     new_reviews = []
                 # else:
                 new_reviews = re.split("', \"|\", '|\", \"|', '", reviews)
+                new_reviews = list(
+                    filter(lambda x: "Comments about " not in x, new_reviews)
+                )
                 new_rows["reviews"] = new_reviews
 
                 data["products"].append(new_rows)
@@ -222,4 +229,6 @@ def make_json(csv_list, jsonFilePath):
 
 # make_json("face_ulta_data.csv", "face_ulta_data.json")
 # make_json("eyes_ulta_data.csv", "eyes_ulta_data.json")
-make_json(["face_ulta_data.csv", "eyes_ulta_data.csv"], "all_data.json")
+make_json(
+    ["face_ulta_data.csv", "eyes_ulta_data.csv", "lips_ulta_data.csv"], "all_data.json"
+)

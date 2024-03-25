@@ -28,6 +28,10 @@ function answerBoxTemplate(
   avg_rating
 ) {
   price_formatted = price.toFixed(2);
+  avg_rating = avg_rating.toFixed(2);
+  if (avg_rating == -1) {
+    avg_rating = "No reviews";
+  }
   return `<div class='answer-item'>
       <img src=${img_link} class='product-image' style='height: 150px; width:150px; margin-top: 1em'></img>
       <div class='answer-text'>
@@ -35,15 +39,13 @@ function answerBoxTemplate(
         <div class='product-info'>
           <div class='product-price'>$${price_formatted}</div>
           <div class='answer-rating'>
-            <div class='product-price'>${avg_rating.toString()}</div>
+            <div class='product-price'>${avg_rating}</div>
             <img src='/static/images/star.svg' style='height: 12px; width: 12px; margin-left: 0.25em'></img>
           </div>
         </div>
         <a href=${link} target='_blank' class='add-button'>Go to product</a>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
-        <p class='product-name'><b>Here's what people are saying about this product: </b>${
-          reviews[0]
-        }</h3>
+        <p class='product-name'><b>Here's what people are saying about this product: </b>${reviews[0]}</h3>
       </div>
   </div>`;
 }
