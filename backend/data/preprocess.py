@@ -37,8 +37,8 @@ def clean_ingredients(data, normalization_map=None):
         "matte",
         "sunscreen",
         "emollient",
-        "fair",
-        "neutral",
+        # "fair",
+        # "neutral",
     }
 
     if normalization_map is None:

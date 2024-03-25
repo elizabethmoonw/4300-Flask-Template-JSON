@@ -68,12 +68,27 @@ def ingredients_set():
         ingredient_dict = {}
         ingredient_dict["ingredients"] = list(ingredients)
 
-        return ingredients
+        with open("ulta_ingredients.json", "w", encoding="utf-8") as jsonf:
+            jsonf.write(json.dumps(ingredient_dict, indent=2))
 
-        # with open("ingredient_list.json", "w", encoding="utf-8") as jsonf:
-        #     jsonf.write(json.dumps(ingredient_dict, indent=2))
+
+def ulta_ingredients():
+    with open("../scraping/all_data.json") as jsonf:
+        file = json.load(jsonf)
+        ingredients = set()
+
+        for product in file["products"]:
+            prod_ingredients = product["ingredients"]
+            # print(prod_ingredients)
+            ingredients.update(prod_ingredients)
+
+            ingredient_dict = {}
+            ingredient_dict["ingredients"] = sorted(list(ingredients))
+
+            with open("ulta_ingredients.json", "w", encoding="utf-8") as jsonf:
+                jsonf.write(json.dumps(ingredient_dict, indent=2))
 
 
 # ingredients_set()
 # ingredients2()
-ingredients3()
+ulta_ingredients()
