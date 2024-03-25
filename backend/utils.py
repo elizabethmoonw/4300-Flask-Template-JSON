@@ -99,6 +99,7 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
 
     similarities = cosine_similarity(target_feature, tsne_features)[0]
 
-    sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
-    print(sorted_indices)
+    # sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
+    sorted_indices = np.argsort(similarities)[::-1][1:]
+    # print(sorted_indices)
     return same_category_products.iloc[sorted_indices]

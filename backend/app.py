@@ -84,7 +84,7 @@ def results_search(query, min_price, max_price, product):
     )
     filter_matches = best_matches[
         (df["price"] >= min_price) & (df["price"] <= max_price)
-    ]
+    ][:10]
     # print("after matches")
     matches_filtered = filter_matches[
         ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
