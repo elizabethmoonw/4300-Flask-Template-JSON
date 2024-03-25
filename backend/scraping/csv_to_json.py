@@ -6,6 +6,107 @@ import re
 
 # Function to convert a CSV to JSON
 # Takes the file paths as arguments
+
+
+def filter_ingredients(ingred_list):
+    new_ingredients = ingred_list
+    new_ingredients = [ingred.lower().strip() for ingred in new_ingredients]
+    new_ingredients = list(filter(None, new_ingredients))
+    new_ingredients = list(
+        filter(
+            lambda x: x != " "
+            and "ci " not in x
+            and len(x) > 2
+            and "please be aware" not in x
+            and "please refer" not in x
+            and "for the most" not in x
+            and "----" not in x
+            and "*" not in x
+            and "when in rome" not in x
+            and "\u202d" not in x
+            and "\u00e9" not in x
+            and "styrene/acrylates copolymer propylene glycol laureth-21 pentylene"
+            not in x
+            and not x.startswith("(")
+            and not x.startswith(".")
+            and not x.startswith("/")
+            and not x.startswith(",")
+            and not x.startswith(";")
+            and "\\\\\\" not in x
+            and "<" not in x
+            and ">" not in x
+            and not x.startswith("20")
+            and not x.startswith("22")
+            and not x.startswith("23")
+            and not x.startswith("77")
+            and not x.startswith("8")
+            and not x.startswith("9")
+            and "%" not in x,
+            new_ingredients,
+        )
+    )
+    new_ingredients = [
+        ("water" if "water" in token or "aqua" in token or "eau" in token else token)
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        ("fragrance" if "fragrance" in token or "parfum" in token else token)
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        (
+            "beeswax"
+            if "beesxwax" in token
+            or "cire d'abeille" in token
+            or "cera alba" in token
+            or "bees wax" in token
+            else token
+        )
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        ("bis-diglyceryl polyacyladipate" if "bis-diglyceryl" in token else token)
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        (
+            "carnauba wax"
+            if "carnauba wax" in token or "copernicia cerifera" in token
+            else token
+        )
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        ("dimethicone" if "dimethicone" in token else token)
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        (
+            "euphorbia cerifera wax"
+            if "euphorbia cerifera" in token or "candelilla" in token
+            else token
+        )
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        ("vinyl dimethicone" if "vinyl dimethicone" in token else token)
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        ("yeast extract" if "yeast extract" in token else token)
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        ("tocopheryl acetate" if "tocopheryl acetate" in token else token)
+        for token in new_ingredients
+    ]
+    new_ingredients = [
+        ("titanium dioxide" if "titanium dioxide" in token else token)
+        for token in new_ingredients
+    ]
+    return new_ingredients
+
+
 def make_json(csv_list, jsonFilePath):
     data = {}
     data["products"] = []
@@ -18,8 +119,11 @@ def make_json(csv_list, jsonFilePath):
 
             # Convert each row into a dictionary
             # and add it to data
-            for rows in csvReader:
-                new_rows = rows
+            for i, rows in enumerate(csvReader):
+                new_rows = {}
+                new_rows["id"] = i
+                new_rows.update(rows)
+
                 if csvFilePath == "face_ulta_data.csv":
                     new_rows["product"] = rows["brand"] + " " + rows["product"]
 
@@ -48,7 +152,30 @@ def make_json(csv_list, jsonFilePath):
                 new_rows["avg_rating"] = float(rows["avg_rating"])
 
                 # ingredients
-                new_rows["ingredients"] = rows["ingredients"][:-1].split(", ")
+                # new_rows["ingredients"] = rows["ingredients"][:-1].split(", ")
+                ingredients = rows["ingredients"]
+                if ingredients.startswith("WARNING"):
+                    new_ingredients = []
+                else:
+                    if "May Contain" in ingredients:
+                        ingredients = ingredients[
+                            : ingredients.index("May Contain") - 1
+                        ]
+                    if ingredients.endswith("."):
+                        ingredients = ingredients[:-1]
+                    if "Iron Oxides " in ingredients:
+                        new_ingredients = re.split(
+                            ", |\. | \d+%| \d+\.\d+%|Inactive: |Active: |.*: |\+ / \-|\[|\]|\+/\-| Iron Oxides",
+                            ingredients,
+                        )
+                    else:
+                        new_ingredients = re.split(
+                            ", |\. | \d+%| \d+\.\d+%|Inactive: |Active: |.*: |\+ / \-|\[|\]|\+/\-",
+                            ingredients,
+                        )
+                    new_ingredients = filter_ingredients(new_ingredients)
+
+                new_rows["ingredients"] = new_ingredients
 
                 # shades
                 shades = rows["shades"][2:-2].split("], [")
@@ -79,32 +206,11 @@ def make_json(csv_list, jsonFilePath):
                 # new_reviews = []
 
                 reviews = rows["reviews"][2:-2]
+                # if len(reviews) == 1 and reviews[0] == "":
+                #     new_reviews = []
+                # else:
                 new_reviews = re.split("', \"|\", '|\", \"|', '", reviews)
                 new_rows["reviews"] = new_reviews
-
-                # for review in reviews:
-                #     new_review = review.split("', '")
-                #     new_reviews.extend(new_review)
-
-                # med_1_reviews = []
-
-                # for review in new_reviews:
-                #     new_review = review.split("', \"")
-                #     med_1_reviews.extend(new_review)
-
-                # med_2_reviews = []
-
-                # for review in med_1_reviews:
-                #     new_review = review.split("\", '")
-                #     med_2_reviews.extend(new_review)
-
-                # final_reviews = []
-
-                # for review in med_2_reviews:
-                #     new_review = review.split('", "')
-                #     final_reviews.extend(new_review)
-
-                # new_rows["reviews"] = final_reviews
 
                 data["products"].append(new_rows)
 
