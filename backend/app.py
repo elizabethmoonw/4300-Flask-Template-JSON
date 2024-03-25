@@ -82,12 +82,12 @@ def results_search(query, min_price, max_price, product):
         & (df["price"] >= min_price)
         & (df["price"] <= max_price)
     ]
-    print("before matches")
-    print(product)
+    # print("before matches")
+    print("product ==== " + product)
     best_matches = find_most_similar_cosine_filtered(
         reverse_product_idx(matches, product), matches
     )
-    print("after matches")
+    # print("after matches")
     matches_filtered = best_matches[
         ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
     ]

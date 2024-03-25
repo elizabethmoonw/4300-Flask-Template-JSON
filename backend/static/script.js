@@ -247,6 +247,10 @@ function formatIngredients(ingredients) {
 }
 
 function getResults() {
+  if (productInputBox.value == "") {
+    alert("Please enter a product to search for");
+    return;
+  }
   answerBox.innerHTML = "";
   priceTokens = priceSlider.value.split(" ");
   minPrice = priceTokens[0].slice(1);
