@@ -5,6 +5,7 @@ from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
+from utils import reverse_product_idx, find_most_similar_cosine_filtered
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -17,7 +18,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 json_file_path = os.path.join(current_directory, "init.json")
 ingredient_file_path = os.path.join(current_directory, "dislikes.json")
 
-eyes_csv_path = os.path.join(current_directory, "scraping/face_ulta_data.csv")
+eyes_csv_path = os.path.join(current_directory, "scraping/eyes_ulta_data.csv")
 
 # Assuming your JSON data is stored in a file named 'init.json'
 # with open(json_file_path, "r") as file:
@@ -74,14 +75,20 @@ def csv_search(query):
     return matches_filtered_json
 
 
-def results_search(query, min_price, max_price):
+def results_search(query, min_price, max_price, product):
     matches = []
     matches = df[
         (df["product"].str.lower().str.contains(query.lower()))
         & (df["price"] >= min_price)
         & (df["price"] <= max_price)
     ]
-    matches_filtered = matches[
+    print("before matches")
+    print(product)
+    best_matches = find_most_similar_cosine_filtered(
+        reverse_product_idx(matches, product), matches
+    )
+    print("after matches")
+    matches_filtered = best_matches[
         ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
@@ -117,7 +124,8 @@ def filter_search():
     input_keywords = [keywords]
     min_price = float(request.args.get("minPrice"))
     max_price = float(request.args.get("maxPrice"))
-    return results_search(input_keywords[0], min_price, max_price)
+    product = request.args.get("product")
+    return results_search(input_keywords[0], min_price, max_price, product)
 
 
 @app.route("/search")
