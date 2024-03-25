@@ -77,20 +77,20 @@ def csv_search(query):
 
 def results_search(query, min_price, max_price, product):
     matches = []
-    matches = df[
-        (df["product"].str.lower().str.contains(query.lower()))
-        & (df["price"] >= min_price)
-        & (df["price"] <= max_price)
-    ]
+    matches = df[(df["product"].str.lower().str.contains(query.lower()))]
     # print("before matches")
     best_matches = find_most_similar_cosine_filtered(
-        reverse_product_idx(matches, product), matches
+        reverse_product_idx(df, product), df
     )
+    filter_matches = best_matches[
+        (df["price"] >= min_price) & (df["price"] <= max_price)
+    ]
     # print("after matches")
-    matches_filtered = best_matches[
+    matches_filtered = filter_matches[
         ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
+    # print("json" + matches_filtered_json)
     return matches_filtered_json
 
 
