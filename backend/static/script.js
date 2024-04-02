@@ -15,6 +15,8 @@ const priceSlider = document.querySelector("#amount");
 
 const answerBox = document.querySelector("#answer-box");
 
+const loader = document.querySelector('#loader');
+
 var dislike_chips = [];
 var filter_chips = [];
 
@@ -261,6 +263,9 @@ function getResults() {
   dislikes = dislike_chips;
   keywords = filter_chips;
 
+  loader.hidden = false;
+
+  console.log(loader.innerHTML);
   fetch(
     "/filter?" +
       new URLSearchParams({
@@ -272,7 +277,7 @@ function getResults() {
       }).toString()
   )
     .then((response) => response.json())
-    .then((data) =>
+    .then((data) =>{
       data.forEach((row) => {
         let tempDiv = document.createElement("div");
         tempDiv.innerHTML = answerBoxTemplate(
@@ -285,6 +290,7 @@ function getResults() {
           row.avg_rating
         );
         answerBox.appendChild(tempDiv);
-      })
-    );
+      });
+      loader.hidden = true;
+  }); 
 }
