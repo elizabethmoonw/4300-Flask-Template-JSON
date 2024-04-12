@@ -30,7 +30,7 @@ function answerBoxTemplate(
   avg_rating
 ) {
   price_formatted = price.toFixed(2);
-  avg_rating = avg_rating.toFixed(2);
+  avg_rating = avg_rating.toFixed(1);
   if (avg_rating == -1) {
     avg_rating = "No reviews";
   }
