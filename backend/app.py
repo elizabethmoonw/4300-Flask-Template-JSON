@@ -113,6 +113,20 @@ def dislike_search(query):
     return matches_filtered_json
 
 
+def suggest_search(input_keyword, min_price, max_price, input_dislikes):
+    matches = df[(df["product"].str.lower().str.contains(input_keyword.lower()))]
+    ingred_filtered = ingredient_boolean_search(matches, input_dislikes)
+    filter_matches = ingred_filtered[
+        (ingred_filtered["price"] >= min_price)
+        & (ingred_filtered["price"] <= max_price)
+    ][:10]
+    matches_filtered = filter_matches[
+        ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
+    ]
+    matches_filtered_json = matches_filtered.to_json(orient="records")
+    return matches_filtered_json
+
+
 @app.route("/")
 def home():
     return render_template("base.html", title="sample html")
@@ -136,6 +150,17 @@ def filter_search():
     return results_search(
         input_keywords[0], min_price, max_price, product, input_dislikes
     )
+
+
+@app.route("/suggest")
+def suggestion_search():
+    dislikes = request.args.get("dislikes")
+    input_dislikes = [dislikes]
+    keywords = request.args.get("keywords")
+    input_keywords = [keywords]
+    min_price = float(request.args.get("minPrice"))
+    max_price = float(request.args.get("maxPrice"))
+    return suggest_search(input_keywords[0], min_price, max_price, input_dislikes)
 
 
 @app.route("/search")
