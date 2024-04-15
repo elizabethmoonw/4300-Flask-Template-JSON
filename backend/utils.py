@@ -103,3 +103,22 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     sorted_indices = np.argsort(similarities)[::-1][1:]
     # print(sorted_indices)
     return same_category_products.iloc[sorted_indices]
+
+
+def ingredient_boolean_search(products_df, disliked_ingredients):
+    """
+    Filters out products that contain the specified disliked ingredients
+    ----------
+    disliked_ingredients: string list
+    """
+    products_df.reset_index(drop=True, inplace=True)
+
+    dislikes = products_df["ingredients"].apply(
+        lambda ingredients: not any(
+            ingredient in disliked_ingredients for ingredient in ingredients
+        )
+    )
+    output_df = products_df[dislikes]
+
+    return output_df
+    # filtered_df = products_df[(products_df["product"].str.lower().str.contains(query.lower()))]

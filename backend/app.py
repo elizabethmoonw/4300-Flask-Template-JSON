@@ -5,7 +5,11 @@ from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
-from utils import reverse_product_idx, find_most_similar_cosine_filtered
+from utils import (
+    reverse_product_idx,
+    find_most_similar_cosine_filtered,
+    ingredient_boolean_search,
+)
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -75,15 +79,20 @@ def csv_search(query):
     return matches_filtered_json
 
 
-def results_search(query, min_price, max_price, product):
-    matches = []
-    matches = df[(df["product"].str.lower().str.contains(query.lower()))]
+def results_search(query, min_price, max_price, product, dislikes):
+    # matches = []
+    # matches = df[(df["product"].str.lower().str.contains(query.lower()))]
     # print("before matches")
+    # print(len(df))
+    # print(len(ingred_filtered))
+    # print(product)
     best_matches = find_most_similar_cosine_filtered(
         reverse_product_idx(df, product), df
     )
-    filter_matches = best_matches[
-        (df["price"] >= min_price) & (df["price"] <= max_price)
+    ingred_filtered = ingredient_boolean_search(best_matches, dislikes)
+    filter_matches = ingred_filtered[
+        (ingred_filtered["price"] >= min_price)
+        & (ingred_filtered["price"] <= max_price)
     ][:10]
     # print("after matches")
     matches_filtered = filter_matches[
@@ -124,7 +133,9 @@ def filter_search():
     min_price = float(request.args.get("minPrice"))
     max_price = float(request.args.get("maxPrice"))
     product = request.args.get("product")
-    return results_search(input_keywords[0], min_price, max_price, product)
+    return results_search(
+        input_keywords[0], min_price, max_price, product, input_dislikes
+    )
 
 
 @app.route("/search")
