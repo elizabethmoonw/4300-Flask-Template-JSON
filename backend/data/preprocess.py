@@ -2,6 +2,9 @@ import numpy as np
 import pandas as pd
 import os
 import re
+from rake_nltk import Rake
+from sentence_transformers import SentenceTransformer, util
+from constants import MAKEUP_ATTRIBUTES, MAC_REVS, DESC_ONLY_ATTRIBUTES
 
 BASE_DIR = os.path.abspath(".")
 DATASET_DIR = os.path.join(BASE_DIR, "data")
@@ -37,8 +40,8 @@ def clean_ingredients(data, normalization_map=None):
         "matte",
         "sunscreen",
         "emollient",
-        "fair",
-        "neutral",
+        # "fair",
+        # "neutral",
     }
 
     if normalization_map is None:
@@ -85,10 +88,35 @@ def tokenize(text):
     return tokens
 
 
-df_cleaned = clean_ingredients(df)
-df_cleaned["tokenized_ingredients"] = df_cleaned.apply(
-    lambda x: tokenize(x["ingredients"]) if pd.notnull(x["ingredients"]) else [], axis=1
-)
-df_cleaned["product_index"] = df_cleaned.index
+def extract_keywords(s: str):
+    r = Rake()
+    r.extract_keywords_from_text(s)
+    rankedList = r.get_ranked_phrases_with_scores()
+    keywordList = [keyword[1] for keyword in rankedList]
+    return keywordList
 
-df_cleaned.to_json(os.path.join(DATASET_DIR, "clean_dataset.json"), orient="records")
+
+def best_tags(tags: list[str], review_keywords: list[list[str]]):
+    keywords = [x for r in review_keywords for x in r]
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    tag_embeddings = model.encode(tags)
+    review_embeddings = model.encode(keywords)
+    best = set()
+    for tag, tag_embed in zip(tags, tag_embeddings):
+        for rev_embed in review_embeddings:
+            sim = util.pytorch_cos_sim(tag_embed, rev_embed)
+            if sim > 0.7:
+                best.add(tag)
+    return best
+
+
+print(best_tags(MAKEUP_ATTRIBUTES, [extract_keywords(rev) for rev in MAC_REVS]))
+
+
+# df_cleaned = clean_ingredients(df)
+# df_cleaned["tokenized_ingredients"] = df_cleaned.apply(
+#     lambda x: tokenize(x["ingredients"]) if pd.notnull(x["ingredients"]) else [], axis=1
+# )
+# df_cleaned["product_index"] = df_cleaned.index
+
+# df_cleaned.to_json(os.path.join(DATASET_DIR, "clean_dataset.json"), orient="records")

@@ -60,18 +60,12 @@ def oh_encoder(product_ingredients, ingredient_index_map):
     return x
 
 
-def tsne_plot(products, features, title="Ingredient Similarity", hover_data="product"):
+def tsne_plot(products):
     """
     Generates and displays a 2D t-SNE plot of products based on their ingredients.
     ----------
     products : list
         A list of products to plot.
-    features : numpy.array
-        t-SNE features to plot.
-    title : str, optional
-        The title of the plot.
-    hover_data : str, optional
-        The column name to display on hover.
     """
 
     for i, product in enumerate(products):
@@ -79,6 +73,8 @@ def tsne_plot(products, features, title="Ingredient Similarity", hover_data="pro
         product["Y"] = tsne_features[i, 1]
 
     df = pd.DataFrame(products)
+    df["X"] = tsne_features[:, 0]
+    df["Y"] = tsne_features[:, 1]
 
     fig = px.scatter(
         df,
@@ -104,6 +100,8 @@ def tsne_plot(products, features, title="Ingredient Similarity", hover_data="pro
     )
     fig.show()
 
+    return df
+
 
 # EXAMPLE: t-SNE Face Plot
 ingredient_index_map = ingredient_idx(products)
@@ -116,53 +114,46 @@ for i, product in enumerate(products):
 
 model = TSNE(n_components=2, learning_rate=200)
 tsne_features = model.fit_transform(a)
-tsne_plot(products, tsne_features)
+tsne_plot(products)
 
 
-def find_most_similar_cosine(product_index, n_similar=5):
+def find_most_similar_cosine(product_index, products, n_similar=5):
     """
-    Finds the n most similar products with cosine similarity
+    Finds the n most similar products based on cosine similarity using t-SNE features.
     ----------
-    product_idx : int
-        The input product index
+    product_index : int
+        The index of the target product in the products list.
+    products : list
+        List of products with 'X' and 'Y' t-SNE attributes.
     n_similar : int
-        number of similar products to be returned
+        Number of similar products to return.
     Returns
     -------
     list
-         A list of n most similar products
+        A list of n most similar products.
     """
-    # Filter by category
     target_product = products[product_index]
     target_category = target_product["category"]
 
-    same_category_products = [
-        product for product in products if product["category"] == target_category
-    ]
-    same_category_indices = [
-        i
-        for i, product in enumerate(products)
-        if product["category"] == target_category
-    ]
+    same_category_products = [p for p in products if p["category"] == target_category]
+    tsne_features = np.array([[p["X"], p["Y"]] for p in same_category_products])
 
-    category_features = a[same_category_indices]
-    similarities = cosine_similarity([a[product_index]], category_features)[0]
+    target_feature = np.array([[target_product["X"], target_product["Y"]]])
+    similarities = cosine_similarity(target_feature, tsne_features)[0]
 
-    sorted_indices = np.argsort(similarities)[::-1][
-        1 : n_similar + 1
-    ]  # [1:n_similar+1] to skip itself
-
+    sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
     return [same_category_products[i] for i in sorted_indices]
 
 
-# EXAMPLE: Find 5 most similar products to Studio Fix Powder Plus Foundation Makeup
-similar_products = find_most_similar_cosine(0)
-print("Finding most similar products for: " + str(products[0]["product"]))
+# EXAMPLE
+similar_products = find_most_similar_cosine(0, products)
+print("Finding most similar products for: " + products[0]["product"])
 for product in similar_products:
     print(product["product"])
+    print(product["ingredients"])
 
-# EXAMPLE: Find 5 most similar products to CC+ Cream with SPF 50+
-similar_products = find_most_similar_cosine(1)
-print("Finding most similar products for: " + str(products[1]["product"]))
+similar_products = find_most_similar_cosine(1, products)
+print("Finding most similar products for: " + products[1]["product"])
 for product in similar_products:
     print(product["product"])
+    print(product["ingredients"])
