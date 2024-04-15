@@ -124,3 +124,40 @@ def one_hot_encode(products_df, ingredient_index):
             if ingredient in ingredient_index:
                 encoded[i, ingredient_index[ingredient]] = 1
     return encoded
+
+
+# The "default values are: alpha=1, beta=0.75, gamma=0.15"
+def rocchio(
+    query_vector, relevant_vectors, irrelevant_vectors, alpha=0.3, beta=0.3, gamma=0.8
+):
+    """
+    Performs Rocchio's algorithm to update vector weights
+    ----------
+    query_idx : int
+        the input query index
+    relevant_indices : int
+        the indices of relevant products
+    irrelevant_indices : int
+        the indices of irrelevant products
+    Returns
+    -------
+    list
+         updated query weight vector
+    """
+    relevant_mean = np.mean(relevant_vectors, axis=0)
+    irrelevant_mean = (
+        np.mean(irrelevant_vectors, axis=0)
+        if irrelevant_vectors.size > 0
+        else np.zeros_like(query_vector)
+    )
+
+    # print("Relevant Mean Norm:", np.linalg.norm(relevant_mean))
+    # print("Irrelevant Mean Norm:", np.linalg.norm(irrelevant_mean))
+
+    updated_query = (
+        alpha * query_vector + beta * relevant_mean - gamma * irrelevant_mean
+    )
+
+    # print("Original:", np.linalg.norm(query_vector))
+    # print("Updated:", np.linalg.norm(updated_query))
+    return updated_query
