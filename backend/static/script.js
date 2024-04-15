@@ -15,7 +15,7 @@ const priceSlider = document.querySelector("#amount");
 
 const answerBox = document.querySelector("#answer-box");
 
-const loader = document.querySelector('#loader');
+const loader = document.querySelector("#loader");
 
 var dislike_chips = [];
 var filter_chips = [];
@@ -252,45 +252,82 @@ function formatIngredients(ingredients) {
 
 function getResults() {
   if (productInputBox.value == "") {
-    alert("Please enter a product to search for");
-    return;
-  }
-  answerBox.innerHTML = "";
-  priceTokens = priceSlider.value.split(" ");
-  minPrice = priceTokens[0].slice(1);
-  maxPrice = priceTokens[2].slice(1);
-  product = productInputBox.value;
-  dislikes = dislike_chips;
-  keywords = filter_chips;
+    answerBox.innerHTML = "";
+    priceTokens = priceSlider.value.split(" ");
+    minPrice = priceTokens[0].slice(1);
+    maxPrice = priceTokens[2].slice(1);
+    // product = productInputBox.value;
+    dislikes = dislike_chips;
+    keywords = filter_chips;
 
-  loader.hidden = false;
+    loader.hidden = false;
 
-  console.log(loader.innerHTML);
-  fetch(
-    "/filter?" +
-      new URLSearchParams({
-        product: product,
-        dislikes: dislike_chips,
-        keywords: filter_chips,
-        minPrice: minPrice,
-        maxPrice: maxPrice,
-      }).toString()
-  )
-    .then((response) => response.json())
-    .then((data) =>{
-      data.forEach((row) => {
-        let tempDiv = document.createElement("div");
-        tempDiv.innerHTML = answerBoxTemplate(
-          row.product,
-          row.link,
-          row.price,
-          row.img_link,
-          formatIngredients(row.ingredients),
-          row.reviews,
-          row.avg_rating
-        );
-        answerBox.appendChild(tempDiv);
+    console.log(loader.innerHTML);
+    fetch(
+      "/suggest?" +
+        new URLSearchParams({
+          // product: product,
+          dislikes: dislike_chips,
+          keywords: filter_chips,
+          minPrice: minPrice,
+          maxPrice: maxPrice,
+        }).toString()
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        data.forEach((row) => {
+          let tempDiv = document.createElement("div");
+          tempDiv.innerHTML = answerBoxTemplate(
+            row.product,
+            row.link,
+            row.price,
+            row.img_link,
+            formatIngredients(row.ingredients),
+            row.reviews,
+            row.avg_rating
+          );
+          answerBox.appendChild(tempDiv);
+        });
+        loader.hidden = true;
       });
-      loader.hidden = true;
-  }); 
+  } else {
+    answerBox.innerHTML = "";
+    priceTokens = priceSlider.value.split(" ");
+    minPrice = priceTokens[0].slice(1);
+    maxPrice = priceTokens[2].slice(1);
+    product = productInputBox.value;
+    dislikes = dislike_chips;
+    keywords = filter_chips;
+
+    loader.hidden = false;
+
+    console.log(loader.innerHTML);
+    fetch(
+      "/filter?" +
+        new URLSearchParams({
+          product: product,
+          dislikes: dislike_chips,
+          keywords: filter_chips,
+          minPrice: minPrice,
+          maxPrice: maxPrice,
+        }).toString()
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        data.forEach((row) => {
+          let tempDiv = document.createElement("div");
+          tempDiv.innerHTML = answerBoxTemplate(
+            row.product,
+            row.link,
+            row.price,
+            row.img_link,
+            formatIngredients(row.ingredients),
+            row.reviews,
+            row.avg_rating
+          );
+          answerBox.appendChild(tempDiv);
+        });
+        loader.hidden = true;
+      });
+  }
 }
