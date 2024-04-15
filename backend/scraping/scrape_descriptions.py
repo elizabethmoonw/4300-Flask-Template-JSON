@@ -49,7 +49,7 @@ def scrape_link(link):
 
 def main():
     # , "face_ulta_data.csv", "lips_ulta_data.csv"]
-    files = ["eyes_ulta_data.csv"]
+    files = ["lips_ulta_data.csv"]
     for file in files:
         updated = update_file(file)
         updated.to_csv(file, index=False)
