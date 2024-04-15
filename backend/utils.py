@@ -103,3 +103,24 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     sorted_indices = np.argsort(similarities)[::-1][1:]
     # print(sorted_indices)
     return same_category_products.iloc[sorted_indices]
+
+
+def load_products(json_path):
+    with open(json_path, "r") as file:
+        return pd.DataFrame(json.load(file))
+
+
+def build_ingredient_idx(products_df):
+    ingredients = set()
+    for item in products_df["ingredients"]:
+        ingredients.update(item)
+    return {ingredient: i for i, ingredient in enumerate(ingredients)}
+
+
+def one_hot_encode(products_df, ingredient_index):
+    encoded = np.zeros((len(products_df), len(ingredient_index)))
+    for i, ingredients in enumerate(products_df["ingredients"]):
+        for ingredient in ingredients:
+            if ingredient in ingredient_index:
+                encoded[i, ingredient_index[ingredient]] = 1
+    return encoded
