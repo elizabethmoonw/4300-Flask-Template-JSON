@@ -139,7 +139,7 @@ def make_json(csv_list, jsonFilePath):
                         new_rows["price"] = float(
                             rows["price"][
                                 rows["price"].rindex("$")
-                                + 1 : rows["price"].rindex(".")
+                                + 1: rows["price"].rindex(".")
                                 + 3
                             ]
                         )
@@ -148,7 +148,7 @@ def make_json(csv_list, jsonFilePath):
                 else:
                     new_rows["price"] = float(
                         rows["price"][
-                            rows["price"].index("$") + 1 : rows["price"].index(".") + 3
+                            rows["price"].index("$") + 1: rows["price"].index(".") + 3
                         ]
                     )
 
@@ -189,7 +189,7 @@ def make_json(csv_list, jsonFilePath):
                     if ", (" in shade:
                         if "array" not in shade:
                             shade_rgb = shade[
-                                shade.rindex("(") + 1 : shade.rindex(")")
+                                shade.rindex("(") + 1: shade.rindex(")")
                             ].split(", ")
                             for i in range(len(shade_rgb)):
                                 shade_rgb[i] = int(shade_rgb[i])
@@ -220,6 +220,7 @@ def make_json(csv_list, jsonFilePath):
                 new_rows["reviews"] = new_reviews
 
                 data["products"].append(new_rows)
+                new_rows["summary"] = rows["summary"]
 
         # Open a json writer, and use the json.dumps()
         # function to dump data
@@ -230,5 +231,6 @@ def make_json(csv_list, jsonFilePath):
 # make_json("face_ulta_data.csv", "face_ulta_data.json")
 # make_json("eyes_ulta_data.csv", "eyes_ulta_data.json")
 make_json(
-    ["face_ulta_data.csv", "eyes_ulta_data.csv", "lips_ulta_data.csv"], "all_data.json"
+    ["face_ulta_data.csv", "eyes_ulta_data.csv",
+        "lips_ulta_data.csv"], "all_data.json"
 )
