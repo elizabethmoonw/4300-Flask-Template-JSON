@@ -2,12 +2,30 @@ import numpy as np
 import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.metrics.pairwise import cosine_similarity
-from sklearn.preprocessing import StandardScaler
-import plotly.express as px
-import json
-import os
 
 
+# def ingredient_idx(products_df: pd.DataFrame):
+#     """
+#     Creates an inverted index of ingredients
+#     ----------
+#     products : list
+#         A list of product dictionaries, each containing an 'ingredients' key.
+#     Returns
+#     -------
+#     dict
+#         dict with unique index for each unique ingredient found in the dataset.
+#     """
+#     idx = 0
+#     ingredient_index = {}
+#     for _, product in products_df.iterrows():
+#         for ingredient in product["ingredients"]:
+#             if ingredient not in ingredient_index:
+#                 ingredient_index[ingredient] = idx
+#                 idx += 1
+#     return ingredient_index
+
+
+# OPTIMIZED
 def ingredient_idx(products_df: pd.DataFrame):
     """
     Creates an inverted index of ingredients
@@ -19,14 +37,37 @@ def ingredient_idx(products_df: pd.DataFrame):
     dict
         dict with unique index for each unique ingredient found in the dataset.
     """
-    idx = 0
-    ingredient_index = {}
-    for _, product in products_df.iterrows():
-        for ingredient in product["ingredients"]:
-            if ingredient not in ingredient_index:
-                ingredient_index[ingredient] = idx
-                idx += 1
+    unique_ingredients = set()
+    for ingredients in products_df["ingredients"]:
+        unique_ingredients.update(ingredients)
+
+    ingredient_index = {
+        ingredient: i for i, ingredient in enumerate(sorted(unique_ingredients))
+    }
     return ingredient_index
+
+
+# def oh_encoder(product_ingredients, ingredient_index_map):
+#     """
+#     One hot encodes the ingredients list where each element corresponds to an
+#     ingredient, and its value is 1 if the ingredient is present in the
+#     product and 0 otherwise
+#     ----------
+#     product_ingredients : list
+#         A list of ingredients for a single product.
+#     ingredient_index_map : dict
+#         A dictionary mapping ingredients to indices.
+#     Returns
+#     -------
+#     numpy.array
+#         A one-hot encoded array representing the presence of ingredients in the product.
+#     """
+#     x = np.zeros(len(ingredient_index_map))
+#     for ingredient in product_ingredients:
+#         if ingredient in ingredient_index_map:
+#             idx = ingredient_index_map[ingredient]
+#             x[idx] = 1
+#     return x
 
 
 def oh_encoder(product_ingredients, ingredient_index_map):
@@ -45,10 +86,12 @@ def oh_encoder(product_ingredients, ingredient_index_map):
         A one-hot encoded array representing the presence of ingredients in the product.
     """
     x = np.zeros(len(ingredient_index_map))
-    for ingredient in product_ingredients:
-        if ingredient in ingredient_index_map:
-            idx = ingredient_index_map[ingredient]
-            x[idx] = 1
+    indices = [
+        ingredient_index_map[ing]
+        for ing in product_ingredients
+        if ing in ingredient_index_map
+    ]
+    x[indices] = 1
     return x
 
 
@@ -122,27 +165,6 @@ def ingredient_boolean_search(products_df, disliked_ingredients):
 
     return output_df
     # filtered_df = products_df[(products_df["product"].str.lower().str.contains(query.lower()))]
-
-
-def load_products(json_path):
-    with open(json_path, "r") as file:
-        return pd.DataFrame(json.load(file))
-
-
-def build_ingredient_idx(products_df):
-    ingredients = set()
-    for item in products_df["ingredients"]:
-        ingredients.update(item)
-    return {ingredient: i for i, ingredient in enumerate(ingredients)}
-
-
-def one_hot_encode(products_df, ingredient_index):
-    encoded = np.zeros((len(products_df), len(ingredient_index)))
-    for i, ingredients in enumerate(products_df["ingredients"]):
-        for ingredient in ingredients:
-            if ingredient in ingredient_index:
-                encoded[i, ingredient_index[ingredient]] = 1
-    return encoded
 
 
 # The "default values are: alpha=1, beta=0.75, gamma=0.15"
