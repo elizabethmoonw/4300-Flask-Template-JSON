@@ -6,11 +6,11 @@ from rake_nltk import Rake
 from sentence_transformers import SentenceTransformer, util
 from constants import MAKEUP_ATTRIBUTES, MAC_REVS, DESC_ONLY_ATTRIBUTES
 
-BASE_DIR = os.path.abspath(".")
-DATASET_DIR = os.path.join(BASE_DIR, "data")
+# BASE_DIR = os.path.abspath(".")
+# DATASET_DIR = os.path.join(BASE_DIR, "data")
 
-# # [TODO] REPLACE WITH FULL SET
-df = pd.read_csv(os.path.join(DATASET_DIR, "test.csv"))
+# # # [TODO] REPLACE WITH FULL SET
+# df = pd.read_csv(os.path.join(DATASET_DIR, "test.csv"))
 
 
 def clean_ingredients(data, normalization_map=None):
@@ -105,7 +105,7 @@ def best_tags(tags: list[str], review_keywords: list[list[str]]):
     for tag, tag_embed in zip(tags, tag_embeddings):
         for rev_embed in review_embeddings:
             sim = util.pytorch_cos_sim(tag_embed, rev_embed)
-            if sim > 0.7:
+            if sim > 0.8:
                 best.add(tag)
     return best
 
