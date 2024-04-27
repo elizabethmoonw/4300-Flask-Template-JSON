@@ -87,7 +87,7 @@ def results_search(query, min_price, max_price, product, dislikes):
     # print(len(ingred_filtered))
     # print(product)
     best_matches = find_most_similar_cosine_filtered(
-        reverse_product_idx(df, product), df
+        reverse_product_idx(product, product_names), df
     )
     ingred_filtered = ingredient_boolean_search(best_matches, dislikes)
     filter_matches = ingred_filtered[
@@ -177,3 +177,6 @@ def searchIngredients():
 
 if "DB_NAME" not in os.environ:
     app.run(debug=True, host="0.0.0.0", port=5000)
+
+if __name__ == "__main__":
+    app.run(debug=True, host="127.0.0.1", port=5000)

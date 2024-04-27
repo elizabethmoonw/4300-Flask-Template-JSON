@@ -2,30 +2,9 @@ import numpy as np
 import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.metrics.pairwise import cosine_similarity
+import os
 
 
-# def ingredient_idx(products_df: pd.DataFrame):
-#     """
-#     Creates an inverted index of ingredients
-#     ----------
-#     products : list
-#         A list of product dictionaries, each containing an 'ingredients' key.
-#     Returns
-#     -------
-#     dict
-#         dict with unique index for each unique ingredient found in the dataset.
-#     """
-#     idx = 0
-#     ingredient_index = {}
-#     for _, product in products_df.iterrows():
-#         for ingredient in product["ingredients"]:
-#             if ingredient not in ingredient_index:
-#                 ingredient_index[ingredient] = idx
-#                 idx += 1
-#     return ingredient_index
-
-
-# OPTIMIZED
 def ingredient_idx(products_df: pd.DataFrame):
     """
     Creates an inverted index of ingredients
@@ -45,29 +24,6 @@ def ingredient_idx(products_df: pd.DataFrame):
         ingredient: i for i, ingredient in enumerate(sorted(unique_ingredients))
     }
     return ingredient_index
-
-
-# def oh_encoder(product_ingredients, ingredient_index_map):
-#     """
-#     One hot encodes the ingredients list where each element corresponds to an
-#     ingredient, and its value is 1 if the ingredient is present in the
-#     product and 0 otherwise
-#     ----------
-#     product_ingredients : list
-#         A list of ingredients for a single product.
-#     ingredient_index_map : dict
-#         A dictionary mapping ingredients to indices.
-#     Returns
-#     -------
-#     numpy.array
-#         A one-hot encoded array representing the presence of ingredients in the product.
-#     """
-#     x = np.zeros(len(ingredient_index_map))
-#     for ingredient in product_ingredients:
-#         if ingredient in ingredient_index_map:
-#             idx = ingredient_index_map[ingredient]
-#             x[idx] = 1
-#     return x
 
 
 def oh_encoder(product_ingredients, ingredient_index_map):
@@ -95,24 +51,29 @@ def oh_encoder(product_ingredients, ingredient_index_map):
     return x
 
 
-def create_tsne(products_df: pd.DataFrame):
+# All prods
+def encode_ingredients(products_df):
     ingredient_index_map = ingredient_idx(products_df)
-    m = len(products_df)
-    n = len(ingredient_index_map)
-    a = np.zeros((m, n))
+    encoded_data = np.zeros((len(products_df), len(ingredient_index_map)))
 
     for i, product in products_df.iterrows():
-        a[i, :] = oh_encoder(product["ingredients"], ingredient_index_map)
+        encoded_data[i, :] = oh_encoder(product["ingredients"], ingredient_index_map)
 
-    model = TSNE(n_components=2, learning_rate=200, random_state=1)
-    tsne_features = model.fit_transform(a)
+    return encoded_data
+
+
+# dimensionality reduction
+def create_tsne(products_df: pd.DataFrame, encoded_matrix):
+    tsne = TSNE(n_components=2, learning_rate=200, random_state=1)
+    tsne_features = tsne.fit_transform(encoded_matrix)
+
     products_df["X"] = tsne_features[:, 0]
     products_df["Y"] = tsne_features[:, 1]
+
     return products_df
 
 
-def reverse_product_idx(products_df: pd.DataFrame, product: str):
-    product_names = list(products_df["product"])
+def reverse_product_idx(product: str, product_names: list):
     return product_names.index(product)
 
 
@@ -130,7 +91,7 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
          A list of n most similar products
     """
     # Filter by category
-    products_df = create_tsne(products_df)
+    products_df = create_tsne(products_df, encoded_matrix=encoded_matrix)
     target_product = products_df.iloc[product_index]
     target_category = target_product["category"]
 
@@ -202,3 +163,30 @@ def rocchio(
     # print("Original:", np.linalg.norm(query_vector))
     # print("Updated:", np.linalg.norm(updated_query))
     return updated_query
+
+
+def save_encoded_matrix(encoded_matrix):
+    np.save("encoded_matrix.npy", encoded_matrix)
+
+
+def load_encoded_matrix():
+    return np.load("encoded_matrix.npy")
+
+
+def load_products(file_path):
+    _, file_extension = os.path.splitext(file_path)
+    if file_extension == ".json":
+        return pd.read_json(file_path)
+    elif file_extension == ".csv":
+        return pd.read_csv(file_path)
+
+
+BASE_DIR = os.path.abspath(".")
+DATASET_DIR = os.path.join(BASE_DIR, "data")
+products_file_path = os.path.join(DATASET_DIR, "tagged_products.csv")
+
+products_df = load_products(products_file_path)
+
+encoded_matrix = encode_ingredients(products_df)
+save_encoded_matrix(encoded_matrix)
+load_encoded_matrix()
