@@ -89,7 +89,11 @@ def results_search(query, min_price, max_price, product, dislikes):
     best_matches = find_most_similar_cosine_filtered(
         reverse_product_idx(product, product_names), df
     )
-    ingred_filtered = ingredient_boolean_search(best_matches, dislikes)
+    if len(dislikes) != 0:
+        ingred_filtered = ingredient_boolean_search(best_matches, dislikes)
+    else:
+        ingred_filtered = best_matches
+    # print(ingred_filtered)
     filter_matches = ingred_filtered[
         (ingred_filtered["price"] >= min_price)
         & (ingred_filtered["price"] <= max_price)
