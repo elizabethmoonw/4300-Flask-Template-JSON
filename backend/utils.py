@@ -155,14 +155,19 @@ def ingredient_boolean_search(products_df, disliked_ingredients):
     disliked_ingredients: string list
     """
     products_df.reset_index(drop=True, inplace=True)
-
+    # print(products_df.dtypes)
     dislikes = products_df["ingredients"].apply(
         lambda ingredients: not any(
             ingredient in disliked_ingredients for ingredient in ingredients
         )
     )
     output_df = products_df[dislikes]
+    # output_df = products_df[
+    #     products_df["ingredients"].str.contains("|".join(disliked_ingredients)) == False
+    # ]
+    # output_df = products_df
 
+    # print(output_df["ingredients"])
     return output_df
     # filtered_df = products_df[(products_df["product"].str.lower().str.contains(query.lower()))]
 
