@@ -148,6 +148,7 @@ function selectDislike(element) {
   let selectUserData = element.textContent;
   if (!dislike_chips.includes(selectUserData)) {
     dislike_chips.push(selectUserData);
+    // console.log(dislike_chips);
     var chip = document.createElement("div");
     chip.classList.add("dis-chip");
     chip_text = document.createElement("span");
@@ -301,7 +302,7 @@ function getResults() {
 
     loader.hidden = false;
 
-    console.log(loader.innerHTML);
+    // console.log(loader.innerHTML);
     fetch(
       "/filter?" +
         new URLSearchParams({

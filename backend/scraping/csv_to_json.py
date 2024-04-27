@@ -272,6 +272,8 @@ def make_json(csv_list, jsonFilePath):
 
         # Open a json writer, and use the json.dumps()
         # function to dump data
+        print("number of products: ", len(data["products"]))
+
         with open(jsonFilePath, "w", encoding="utf-8") as jsonf:
             jsonf.write(json.dumps(data, indent=2))
 

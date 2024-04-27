@@ -9,6 +9,7 @@ from utils import (
     reverse_product_idx,
     find_most_similar_cosine_filtered,
     ingredient_boolean_search,
+    create_ingredient_mat,
 )
 
 # ROOT_PATH for linking with all your files.
@@ -43,6 +44,7 @@ eyes_df = pd.read_csv(eyes_csv_path)
 model = SentenceTransformer("all-MiniLM-L12-v2")
 product_names = df["product"].tolist()
 product_embeddings = model.encode(product_names, convert_to_tensor=True)
+create_ingredient_mat(df)
 
 app = Flask(__name__)
 CORS(app)
@@ -90,7 +92,8 @@ def results_search(query, min_price, max_price, product, dislikes):
         reverse_product_idx(product, product_names), df
     )
     if len(dislikes) != 0:
-        ingred_filtered = ingredient_boolean_search(best_matches, dislikes)
+        dislikes_list = dislikes[0].split(",")
+        ingred_filtered = ingredient_boolean_search(best_matches, dislikes_list)
     else:
         ingred_filtered = best_matches
     # print(ingred_filtered)

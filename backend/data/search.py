@@ -7,6 +7,7 @@ import plotly.express as px
 import json
 import os
 import re
+from utils import load_encoded_matrix
 
 BASE_DIR = os.path.abspath(".")
 DATASET_DIR = os.path.join(BASE_DIR, "data")
