@@ -116,7 +116,7 @@ def make_json(csv_list, jsonFilePath):
     for csvFilePath in csv_list:
         # create a dictionary
         # Open a csv reader called DictReader
-        with open(csvFilePath, encoding="latin-1") as csvf:
+        with open(csvFilePath, encoding="utf-8") as csvf:
             csvReader = csv.DictReader(csvf)
 
             # Convert each row into a dictionary
@@ -128,6 +128,13 @@ def make_json(csv_list, jsonFilePath):
                 new_rows.update(rows)
                 new_rows["id"] = int(rows["id"])
                 del new_rows[""]
+
+                new_rows["product"] = (
+                    rows["product"]
+                    .replace("ÃÂ´", "ô")
+                    .replace("ÃÂ©", "é")
+                    .replace("ÃÂ¨", "è")
+                )
 
                 # if (
                 #     csvFilePath == "face_ulta_data.csv"
@@ -223,7 +230,7 @@ def make_json(csv_list, jsonFilePath):
                     for shade in old_shades:
                         new_shade = {}
                         new_shade["shade_name"] = shade[
-                            shade.index(":") + 4 : shade.index(",") - 1
+                            shade.index(":") + 3 : shade.index(",") - 1
                         ]
                         if "https" not in shade:
                             new_shade["shade_img"] = ""
