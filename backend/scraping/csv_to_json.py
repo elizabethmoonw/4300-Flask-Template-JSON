@@ -277,6 +277,10 @@ def make_json(csv_list, jsonFilePath):
                     new_rows["tags"] = []
                 else:
                     new_rows["tags"] = rows["tags"][2:-2].split("', '")
+
+                new_rows["tag_vectors"] = [
+                    float(item) for item in rows["tag_vectors"].strip("[]").split()
+                ]
                 # data[key] = new_rows
 
         # Open a json writer, and use the json.dumps()

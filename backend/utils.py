@@ -115,7 +115,7 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
 
     target_tags = products_df.iloc[product_index]["tag_vectors"]
     tag_vectors = np.array(
-        [p["tag_vectors"] for _, p in same_category_products.iterrows()]
+        [p["tag_vectors"] for _, p in same_category_products.iterrows()], dtype="object"
     )
 
     tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
