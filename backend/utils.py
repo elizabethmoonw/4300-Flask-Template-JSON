@@ -93,17 +93,33 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
          A list of n most similar products
     """
     # Filter by category
-    products_df = create_tsne(products_df, encoded_matrix=encoded_matrix)
+    # products_df = create_tsne(products_df)
     target_product = products_df.iloc[product_index]
     target_category = target_product["category"]
 
-    same_category_products = products_df[products_df["category"] == target_category]
-    tsne_features = np.array(
-        [[p["X"], p["Y"]] for _, p in same_category_products.iterrows()]
+    ingredient_index_map = ingredient_idx(products_df)
+    products_df["ingredients_vector"] = products_df["ingredients"].apply(
+        lambda x: oh_encoder(x, ingredient_index_map)
     )
-    target_feature = np.array([[target_product["X"], target_product["Y"]]])
+    same_category_products = products_df[products_df["category"] == target_category]
+    # tsne_features = np.array(
+    #     [[p["X"], p["Y"]] for _, p in same_category_products.iterrows()]
+    # )
+    # target_feature = np.array([[target_product["X"], target_product["Y"]]])
+    vectors = np.array(
+        [p["ingredients_vector"] for _, p in same_category_products.iterrows()]
+    )
 
-    similarities = cosine_similarity(target_feature, tsne_features)[0]
+    target_feature = [products_df.iloc[product_index]["ingredients_vector"]]
+    similarities = cosine_similarity(target_feature, vectors)[0]
+
+    target_tags = products_df.iloc[product_index]["tag_vectors"]
+    tag_vectors = np.array(
+        [p["tag_vectors"] for _, p in same_category_products.iterrows()]
+    )
+
+    tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
+    similarities += tag_similarities
 
     # sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
     sorted_indices = np.argsort(similarities)[::-1][1:]
