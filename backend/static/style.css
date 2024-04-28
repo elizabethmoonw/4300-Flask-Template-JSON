@@ -109,6 +109,21 @@ input {
     display: flex;
     flex-direction: column;
     align-items: center;
+    float: right;
+}
+
+.header-container{
+    align-items: center;
+    display: flex;
+    justify-content: center;
+}
+
+.logo {
+    width: 4rem;
+    height: 4rem;
+    margin-right: 10px;
+    top: 1.2rem;
+    position: relative;
 }
 
 .input-box input{
@@ -267,8 +282,8 @@ input {
     display: flex;
     justify-content: left;
     /* max-width: 800px; */
-    width: 40%;
-    /* width: 600px; */
+    /* width: 40%; */
+    width: 38rem;
     align-items: flex-start;
     text-align: left;
     margin-top: 0.5em;
