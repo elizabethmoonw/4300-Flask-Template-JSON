@@ -26,7 +26,7 @@ function answerBoxTemplate(
   price,
   img_link,
   ingredients,
-  reviews,
+  review,
   avg_rating
 ) {
   price_formatted = price.toFixed(2);
@@ -47,7 +47,11 @@ function answerBoxTemplate(
         </div>
         <a href=${link} target='_blank' class='add-button'>Go to product</a>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
-        <p class='product-name'><b>Here's what people are saying about this product: </b>${reviews[0]}</h3>
+        <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
+        <p class='product-name'><b>Did you like this result? </b>
+          <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
+          <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
+        </p>
       </div>
   </div>`;
 }
@@ -278,13 +282,17 @@ function getResults() {
       .then((data) => {
         data.forEach((row) => {
           let tempDiv = document.createElement("div");
+          var review = row.reviews[0];
+          if (review.length > 250) {
+            review = review.substring(0, 250) + "...";
+          }
           tempDiv.innerHTML = answerBoxTemplate(
             row.product,
             row.link,
             row.price,
             row.img_link,
             formatIngredients(row.ingredients),
-            row.reviews,
+            review,
             row.avg_rating
           );
           answerBox.appendChild(tempDiv);
@@ -317,13 +325,17 @@ function getResults() {
       .then((data) => {
         data.forEach((row) => {
           let tempDiv = document.createElement("div");
+          var review = row.reviews[0];
+          if (review.length > 250) {
+            review = review.substring(0, 250) + "...";
+          }
           tempDiv.innerHTML = answerBoxTemplate(
             row.product,
             row.link,
             row.price,
             row.img_link,
             formatIngredients(row.ingredients),
-            row.reviews,
+            review,
             row.avg_rating
           );
           answerBox.appendChild(tempDiv);

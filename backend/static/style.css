@@ -378,6 +378,15 @@ input {
     background-color: #F64182;
 }
 
+.feedback-button {
+    cursor: pointer;
+    border: none;
+    border-width: 0px;
+    background: none;
+    margin-left: 0.5em;
+    align-items: center;
+}
+
 /* slider styling ============================================================*/
 
 .slider-range {
