@@ -103,7 +103,16 @@ def results_search(query, min_price, max_price, product, dislikes):
     ][:10]
     # print("after matches")
     matches_filtered = filter_matches[
-        ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
+        [
+            "product",
+            "link",
+            "price",
+            "img_link",
+            "ingredients",
+            "avg_rating",
+            "reviews",
+            "summary",
+        ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
     # print("json" + matches_filtered_json)
@@ -128,7 +137,16 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
         & (ingred_filtered["price"] <= max_price)
     ][:10]
     matches_filtered = filter_matches[
-        ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
+        [
+            "product",
+            "link",
+            "price",
+            "img_link",
+            "ingredients",
+            "avg_rating",
+            "reviews",
+            "summary",
+        ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
     return matches_filtered_json

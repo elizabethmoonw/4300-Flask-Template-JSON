@@ -27,7 +27,8 @@ function answerBoxTemplate(
   img_link,
   ingredients,
   review,
-  avg_rating
+  avg_rating,
+  summary
 ) {
   price_formatted = price.toFixed(2);
   avg_rating = avg_rating.toFixed(1);
@@ -46,6 +47,7 @@ function answerBoxTemplate(
           </div>
         </div>
         <a href=${link} target='_blank' class='add-button'>Go to product</a>
+        <p class='product-name'>${summary}</p>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
         <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
         <p class='product-name'><b>Did you like this result? </b>
@@ -293,7 +295,8 @@ function getResults() {
             row.img_link,
             formatIngredients(row.ingredients),
             review,
-            row.avg_rating
+            row.avg_rating,
+            row.summary
           );
           answerBox.appendChild(tempDiv);
         });
@@ -336,7 +339,8 @@ function getResults() {
             row.img_link,
             formatIngredients(row.ingredients),
             review,
-            row.avg_rating
+            row.avg_rating,
+            row.summary
           );
           answerBox.appendChild(tempDiv);
         });

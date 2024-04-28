@@ -270,7 +270,9 @@ def make_json(csv_list, jsonFilePath):
                 new_rows["reviews"] = new_reviews
 
                 data["products"].append(new_rows)
-                new_rows["summary"] = rows["summary"]
+                new_rows["summary"] = (
+                    rows["summary"].replace("Â·AÂ·", "A").replace("Ã©", "é")
+                )
                 if rows["tags"][1:-1] == "":
                     new_rows["tags"] = []
                 else:
