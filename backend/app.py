@@ -229,6 +229,37 @@ def shade_search(product):
         return []
 
 
+def prod_search(product):
+    # print("product " + product)
+    match = df.loc[
+        df["product"].str.lower().str.strip() == product.lower().strip()
+    ].iloc[:1]
+
+    if match.empty:
+        return match.to_json(orient="records")
+
+    match["closest_shade_name"] = [""]
+    match["closest_shade_rgb"] = [[]]
+    # print(match)
+    match_filtered = match[
+        [
+            "product",
+            "link",
+            "price",
+            "img_link",
+            "ingredients",
+            "avg_rating",
+            "reviews",
+            "summary",
+            "closest_shade_name",
+            "closest_shade_rgb",
+            "tags",
+        ]
+    ]
+    match_filtered_json = match_filtered.to_json(orient="records")
+    return match_filtered_json
+
+
 @app.route("/")
 def home():
     return render_template("base.html", title="sample html")
@@ -238,6 +269,12 @@ def home():
 def episodes_search():
     text = request.args.get("title")
     return csv_search(text)
+
+
+@app.route("/product")
+def product_search():
+    text = request.args.get("title")
+    return prod_search(text)
 
 
 @app.route("/filter")
