@@ -252,6 +252,8 @@ def make_json(csv_list, jsonFilePath):
                             .replace("\u00c3\u0082\u00c2\u00b0", "°")
                             .replace("\u00c3\u0083\u00c2\u009c", "Ü")
                             .replace("ÃÂ", "")
+                            .replace("\u00c3\\x83\u00c2\u00a9", "é")
+                            .replace("\u00c3\u00b4", "\u00f4")
                         )
                         if "https" not in shade:
                             new_shade["shade_img"] = ""
@@ -299,9 +301,12 @@ def make_json(csv_list, jsonFilePath):
                     .replace("ÃÂ´", "ô")
                     .replace("ÃÂ©", "é")
                     .replace("ÃÂ¨", "è")
+                    .replace("Ã¨", "è")
                     .replace("\u00c3\u0082\u00c2\u00b0", "°")
                     .replace("\u00c3\u0083\u00c2\u009c", "Ü")
                     .replace("ÃÂ", "")
+                    .replace("\u00c3\u00b4", "\u00f4")
+                    .replace("Ã´", "ô")
                 )
                 if rows["tags"][1:-1] == "":
                     new_rows["tags"] = []

@@ -70,7 +70,7 @@ function answerBoxTemplate(
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
         <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
         ${tags_string}
-        <div class='product-name' style='margin-top: 0.5em;'><b>Did you like this result? </b>
+        <div class='product-name' style='margin-top: 1em;'><b>Did you like this result? </b>
           <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
           <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
         </div>
