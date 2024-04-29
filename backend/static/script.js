@@ -26,8 +26,9 @@ function answerBoxTemplate(
   price,
   img_link,
   ingredients,
-  reviews,
-  avg_rating
+  review,
+  avg_rating,
+  summary
 ) {
   price_formatted = price.toFixed(2);
   avg_rating = avg_rating.toFixed(1);
@@ -46,8 +47,13 @@ function answerBoxTemplate(
           </div>
         </div>
         <a href=${link} target='_blank' class='add-button'>Go to product</a>
+        <p class='product-name'>${summary}</p>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
-        <p class='product-name'><b>Here's what people are saying about this product: </b>${reviews[0]}</h3>
+        <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
+        <p class='product-name'><b>Did you like this result? </b>
+          <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
+          <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
+        </p>
       </div>
   </div>`;
 }
@@ -148,6 +154,7 @@ function selectDislike(element) {
   let selectUserData = element.textContent;
   if (!dislike_chips.includes(selectUserData)) {
     dislike_chips.push(selectUserData);
+    // console.log(dislike_chips);
     var chip = document.createElement("div");
     chip.classList.add("dis-chip");
     chip_text = document.createElement("span");
@@ -277,14 +284,19 @@ function getResults() {
       .then((data) => {
         data.forEach((row) => {
           let tempDiv = document.createElement("div");
+          var review = row.reviews[0];
+          if (review.length > 250) {
+            review = review.substring(0, 250) + "...";
+          }
           tempDiv.innerHTML = answerBoxTemplate(
             row.product,
             row.link,
             row.price,
             row.img_link,
             formatIngredients(row.ingredients),
-            row.reviews,
-            row.avg_rating
+            review,
+            row.avg_rating,
+            row.summary
           );
           answerBox.appendChild(tempDiv);
         });
@@ -301,7 +313,7 @@ function getResults() {
 
     loader.hidden = false;
 
-    console.log(loader.innerHTML);
+    // console.log(loader.innerHTML);
     fetch(
       "/filter?" +
         new URLSearchParams({
@@ -316,14 +328,19 @@ function getResults() {
       .then((data) => {
         data.forEach((row) => {
           let tempDiv = document.createElement("div");
+          var review = row.reviews[0];
+          if (review.length > 250) {
+            review = review.substring(0, 250) + "...";
+          }
           tempDiv.innerHTML = answerBoxTemplate(
             row.product,
             row.link,
             row.price,
             row.img_link,
             formatIngredients(row.ingredients),
-            row.reviews,
-            row.avg_rating
+            review,
+            row.avg_rating,
+            row.summary
           );
           answerBox.appendChild(tempDiv);
         });

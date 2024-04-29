@@ -9,6 +9,7 @@ from utils import (
     reverse_product_idx,
     find_most_similar_cosine_filtered,
     ingredient_boolean_search,
+    create_ingredient_mat,
 )
 
 # ROOT_PATH for linking with all your files.
@@ -43,6 +44,7 @@ eyes_df = pd.read_csv(eyes_csv_path)
 model = SentenceTransformer("all-MiniLM-L12-v2")
 product_names = df["product"].tolist()
 product_embeddings = model.encode(product_names, convert_to_tensor=True)
+create_ingredient_mat(df)
 
 app = Flask(__name__)
 CORS(app)
@@ -87,16 +89,30 @@ def results_search(query, min_price, max_price, product, dislikes):
     # print(len(ingred_filtered))
     # print(product)
     best_matches = find_most_similar_cosine_filtered(
-        reverse_product_idx(df, product), df
+        reverse_product_idx(product, product_names), df
     )
-    ingred_filtered = ingredient_boolean_search(best_matches, dislikes)
+    if len(dislikes) != 0:
+        dislikes_list = dislikes[0].split(",")
+        ingred_filtered = ingredient_boolean_search(best_matches, dislikes_list)
+    else:
+        ingred_filtered = best_matches
+    # print(ingred_filtered)
     filter_matches = ingred_filtered[
         (ingred_filtered["price"] >= min_price)
         & (ingred_filtered["price"] <= max_price)
     ][:10]
     # print("after matches")
     matches_filtered = filter_matches[
-        ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
+        [
+            "product",
+            "link",
+            "price",
+            "img_link",
+            "ingredients",
+            "avg_rating",
+            "reviews",
+            "summary",
+        ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
     # print("json" + matches_filtered_json)
@@ -121,7 +137,16 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
         & (ingred_filtered["price"] <= max_price)
     ][:10]
     matches_filtered = filter_matches[
-        ["product", "link", "price", "img_link", "ingredients", "avg_rating", "reviews"]
+        [
+            "product",
+            "link",
+            "price",
+            "img_link",
+            "ingredients",
+            "avg_rating",
+            "reviews",
+            "summary",
+        ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
     return matches_filtered_json
@@ -177,3 +202,6 @@ def searchIngredients():
 
 if "DB_NAME" not in os.environ:
     app.run(debug=True, host="0.0.0.0", port=5000)
+
+if __name__ == "__main__":
+    app.run(debug=True, host="127.0.0.1", port=5000)
