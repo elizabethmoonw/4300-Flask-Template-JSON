@@ -372,10 +372,15 @@ function getResults() {
     // product = productInputBox.value;
     dislikes = dislike_chips;
     keywords = filter_chips;
+    selected_shade = [];
 
     loader.hidden = false;
+    results = document.createElement("div");
+    results.innerHTML =
+      "<h3 style='margin-bottom: 1em;'>Here are some products you might like:</h3>";
+    answerBox.appendChild(results);
 
-    console.log(loader.innerHTML);
+    // console.log(loader.innerHTML);
     fetch(
       "/suggest?" +
         new URLSearchParams({
@@ -388,29 +393,33 @@ function getResults() {
         }).toString()
     )
       .then((response) => response.json())
-      .then((row) => {
-        // data.forEach((row) => {
-        let tempDiv = document.createElement("div");
-        var review = row.reviews[0];
-        if (review.length > 250) {
-          review = review.substring(0, 250) + "...";
-        }
-        tempDiv.innerHTML = answerBoxTemplate(
-          row.product,
-          row.link,
-          row.price,
-          row.img_link,
-          formatIngredients(row.ingredients),
-          review,
-          row.avg_rating,
-          row.summary,
-          "",
-          "",
-          "hidden",
-          row.tags
-        );
-        answerBox.appendChild(tempDiv);
-        // });
+      .then((data) => {
+        data.forEach((row) => {
+          let tempDiv = document.createElement("div");
+          if (row.reviews.length != 0) {
+            review = row.reviews[0];
+            if (review.length > 250) {
+              review = review.substring(0, 250) + "...";
+            }
+          } else {
+            review = "";
+          }
+          tempDiv.innerHTML = answerBoxTemplate(
+            row.product,
+            row.link,
+            row.price,
+            row.img_link,
+            formatIngredients(row.ingredients),
+            review,
+            row.avg_rating,
+            row.summary,
+            "",
+            "",
+            "hidden",
+            row.tags
+          );
+          answerBox.appendChild(tempDiv);
+        });
         loader.hidden = true;
       });
   } else {
@@ -435,14 +444,18 @@ function getResults() {
       .then((data) => {
         // console.log(row);
         data.forEach((row) => {
-          console.log(row);
+          // console.log(row);
           input_prod = document.createElement("div");
           input_prod.innerHTML = `<h3 style='margin-bottom: 1em;'>You searched for:</h3>`;
           answerBox.appendChild(input_prod);
           let tempDiv = document.createElement("div");
-          var review = row.reviews[0];
-          if (review.length > 250) {
-            review = review.substring(0, 250) + "...";
+          if (row.reviews.length != 0) {
+            review = row.reviews[0];
+            if (review.length > 250) {
+              review = review.substring(0, 250) + "...";
+            }
+          } else {
+            review = "";
           }
           rgb_string = "";
           tempDiv.innerHTML = answerBoxTemplate(
@@ -487,7 +500,7 @@ function getResults() {
           loader.hidden = true;
         } else {
           data.forEach((row) => {
-            console.log(row);
+            // console.log(row);
             let tempDiv = document.createElement("div");
             var review = row.reviews[0];
             if (review.length > 250) {
@@ -498,7 +511,7 @@ function getResults() {
             // console.log(row.closest_shade_rgb);
             if (row.closest_shade_rgb.length == 0) {
               hidden = "hidden";
-              console.log("hidden");
+              // console.log("hidden");
             } else {
               rgb_string =
                 "rgb(" +

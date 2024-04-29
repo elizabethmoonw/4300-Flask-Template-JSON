@@ -288,7 +288,6 @@ def filter_shades(shade_matches, top_10_df):
                 new_shade_names.append(new_shade_name)
             except:
                 new_shade_names.append("")
-                new_shade_rgbs.append([])
         else:
             new_shade_names.append("")
             new_shade_rgbs.append([])
