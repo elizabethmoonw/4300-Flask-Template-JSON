@@ -128,6 +128,7 @@ def results_search(query, min_price, max_price, product, dislikes, shade):
             "summary",
             "closest_shade_name",
             "closest_shade_rgb",
+            "tags",
         ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
@@ -162,6 +163,7 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
             "avg_rating",
             "reviews",
             "summary",
+            "tags",
         ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")

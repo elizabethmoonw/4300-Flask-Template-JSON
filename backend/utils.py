@@ -98,7 +98,6 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
          A list of n most similar products
     """
     # Filter by category
-    # products_df = create_tsne(products_df)
     if product_index == -1:
         return pd.DataFrame()
 
@@ -110,10 +109,6 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
         lambda x: oh_encoder(x, ingredient_index_map)
     )
     same_category_products = products_df[products_df["category"] == target_category]
-    # tsne_features = np.array(
-    #     [[p["X"], p["Y"]] for _, p in same_category_products.iterrows()]
-    # )
-    # target_feature = np.array([[target_product["X"], target_product["Y"]]])
     vectors = np.array(
         [p["ingredients_vector"] for _, p in same_category_products.iterrows()]
     )
@@ -133,9 +128,7 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
     similarities = np.multiply(np.power(tag_similarities, 20), similarities)
 
-    # sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
     sorted_indices = np.argsort(similarities)[::-1][1:]
-    # print(sorted_indices)
     return same_category_products.iloc[sorted_indices]
 
 

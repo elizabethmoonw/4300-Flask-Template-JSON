@@ -284,6 +284,7 @@ input {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .dis-chip {
@@ -417,6 +418,7 @@ input {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .keyword-chip {
@@ -427,6 +429,7 @@ input {
     margin-top: 0.5em;
     display: flex;
     align-items: center;
+    max-width: fit-content;
 }
 
 /* buttons ===================================================================*/
@@ -540,4 +543,23 @@ input {
     margin-top: 0.5em;
     color:#FB73A4;
     font-size: 18px;
+}
+
+.tag-chips {
+    display: flex;
+    /* flex-wrap: wrap; */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.tag-chip {
+    background-color: #FFA0C2;
+    border-radius: 50px;
+    padding: 8px 16px;
+    margin-right: 0.5em;
+    margin-top: 0.5em;
+    display: flex;
+    align-items: center;
 }
