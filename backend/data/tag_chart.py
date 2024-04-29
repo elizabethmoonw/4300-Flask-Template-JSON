@@ -3,6 +3,7 @@ from numpy.linalg import norm
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import numpy as np
 
 categories = {'Texture': 0, 'Finish': 1, 'Coverage': 2, 'Formula Benefits': 3,
               'Ingredient Focus': 4, 'Performance': 5,  "Color and Effect": 6, "Utility and Design": 7}
@@ -11,23 +12,41 @@ makeup_categories = {'Creamy': 'Texture', 'Lightweight': 'Texture', 'Heavy': 'Te
 # compare meaning of input words to meaning of each category
 
 
-def generate_graphs(input, rel_products):
+def generate_graphs(input_product, rel_products):
     """
-    input: dictionary for an input. keys are product_name, tags, tag_vector
+    input_product: dictionary for an input. keys are product_name, tags, tag_vector
     relevant_products: dictionary of rel products. keys are product_name, tags, tag_vector 
     """
-    if input['product_name'] != '':
-        sim_scores = get_sim_scores(input['tags'], rel_products)
-    # input =
+    figures = {}
+    if input_product['product_name'] != '':
+        for product in rel_products:
+            sim_scores = get_sim_scores(
+                input_product['tags'], rel_products['tags'])
+            data = {'categories': list(
+                categories.keys()), 'sims_scores': sim_scores}
+            figure = make_fig(data)
+            figures[product['product_name']] = figure
+    return figures
 
 
-def get_sim_scores(tags, rel_product):
-    sim_scores = [0] * 8
-    # for category in makeup_categories:
+def get_sim_scores(tags, rel_tags):
+    p1 = np.zeros(8)
+    p2 = np.zeros(8)
+    for tag in tags:
+        if tag in makeup_categories:
+            p1[categories[makeup_categories[tag]]] += 1
+    for tag in rel_tags:
+        if tag in makeup_categories:
+            p2[categories[makeup_categories[tag]]] += 1
+    print(p1)
+    print(p2)
+    sim_scores = dot(p1, p2)/(norm(p1)*norm(p2))
+    return sim_scores
 
 
 def make_fig(data):
     df = pd.DataFrame(data)
+    print(df)
     fig = px.line_polar(df, r="sim_scores",
                         theta="categories",
                         line_close=True,
@@ -56,7 +75,13 @@ def make_fig(data):
     return fig
 
 
-data = {'categories': list(makeup_categories.keys()),
-        'sim_scores': [0.8, 0.6, 0.9, 0.7, 0.5, 0.4, 0.6, 0.85]
-        }
+# data = {'categories': list(makeup_categories.keys()),
+#         'sim_scores': [0.8, 0.6, 0.9, 0.7, 0.5, 0.4, 0.6, 0.85]
+#         }
 # make_fig(data)
+
+input_tag = {'product_name': 'Dior Forever Natural Nude Foundation',
+             'tags': ['Heavy', 'Medium coverage', 'Lightweight', 'Moisturizing']}
+rel_products = {'product_name': 'Dior Dior Forever Fluid Skin Glow Foundation',
+                'tags': ['Matte', 'Drying', 'Buildable', 'Full Coverage', 'Natural', 'Hydrating']}
+generate_graphs(input_tag, rel_products)
