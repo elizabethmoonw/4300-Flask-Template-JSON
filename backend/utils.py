@@ -1,3 +1,4 @@
+import json
 import numpy as np
 import pandas as pd
 from sklearn.manifold import TSNE
@@ -59,7 +60,8 @@ def encode_ingredients(products_df):
     encoded_data = np.zeros((len(products_df), len(ingredient_index_map)))
 
     for i, product in products_df.iterrows():
-        encoded_data[i, :] = oh_encoder(product["ingredients"], ingredient_index_map)
+        encoded_data[i, :] = oh_encoder(
+            product["ingredients"], ingredient_index_map)
 
     return encoded_data
 
@@ -101,7 +103,8 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     products_df["ingredients_vector"] = products_df["ingredients"].apply(
         lambda x: oh_encoder(x, ingredient_index_map)
     )
-    same_category_products = products_df[products_df["category"] == target_category]
+    same_category_products = products_df[products_df["category"]
+                                         == target_category]
     # tsne_features = np.array(
     #     [[p["X"], p["Y"]] for _, p in same_category_products.iterrows()]
     # )
@@ -113,13 +116,22 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     target_feature = [products_df.iloc[product_index]["ingredients_vector"]]
     similarities = cosine_similarity(target_feature, vectors)[0]
 
-    target_tags = products_df.iloc[product_index]["tag_vectors"]
-    tag_vectors = np.array(
-        [p["tag_vectors"] for _, p in same_category_products.iterrows()], dtype="object"
-    )
+    # print(np.shape(target_feature))
+    # print(len(vectors[0]))
 
-    tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
-    similarities += tag_similarities
+    # target_tags = [products_df.iloc[product_index]["tag_vectors"]]
+    # tag_vectors = np.array(
+    #     [p["tag_vectors"] for _, p in same_category_products.iterrows()], dtype="object"
+    # )
+    # # tag_vectors = tag_vectors.reshape(-1, 1)
+
+    # print(np.shape(target_tags))
+    # for tv in tag_vectors:
+    #     print(len(tv))
+    # print((tag_vectors[0]))
+
+    # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
+    # similarities += tag_similarities
 
     # sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
     sorted_indices = np.argsort(similarities)[::-1][1:]
@@ -197,14 +209,3 @@ def load_products(file_path):
 
 def create_ingredient_mat(products_df):
     ingredient_mat = ingredient_idx(products_df)
-
-
-BASE_DIR = os.path.abspath(".")
-DATASET_DIR = os.path.join(BASE_DIR, "data")
-products_file_path = os.path.join(DATASET_DIR, "tagged_products.csv")
-
-products_df = load_products(products_file_path)
-
-encoded_matrix = encode_ingredients(products_df)
-save_encoded_matrix(encoded_matrix)
-load_encoded_matrix()
