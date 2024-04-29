@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import util
 import os
 import math
 
@@ -115,22 +116,16 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     target_feature = [products_df.iloc[product_index]["ingredients_vector"]]
     similarities = cosine_similarity(target_feature, vectors)[0]
 
-    # print(np.shape(target_feature))
-    # print(len(vectors[0]))
+    target_tags = products_df.iloc[product_index]["tag_vectors"]
+    tag_vectors = np.array(
+        [p["tag_vectors"] for _, p in same_category_products.iterrows()], dtype="object"
+    )
 
-    # target_tags = [products_df.iloc[product_index]["tag_vectors"]]
-    # tag_vectors = np.array(
-    #     [p["tag_vectors"] for _, p in same_category_products.iterrows()], dtype="object"
-    # )
-    # # tag_vectors = tag_vectors.reshape(-1, 1)
-
-    # print(np.shape(target_tags))
-    # for tv in tag_vectors:
-    #     print(len(tv))
-    # print((tag_vectors[0]))
-
+    tag_similarities = util.pytorch_cos_sim(target_tags, tag_vectors)
+    print(tag_similarities.shape)
+    print(similarities.shape)
     # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
-    # similarities += tag_similarities
+    similarities += tag_similarities
 
     # sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
     sorted_indices = np.argsort(similarities)[::-1][1:]
