@@ -136,6 +136,68 @@ input {
     outline: 0;
 }
 
+#shade-box {
+    background-color: #FFECF3;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-direction: width;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 1em;
+    gap: 1em;
+}
+
+.shade-circle {
+    /* background-color: #FFA0C2; */
+    border-radius: 50%;
+    width: 2.5em;
+    height: 2.5em;
+    cursor: pointer;
+    border: solid;
+    border-width: 1px;
+    border-color: #FFA0C2;
+    background: none;
+}
+
+.shade-circle:hover {
+    border: 3px solid #FB73A4;
+    border-width: 3px;
+    border-color: #FB73A4;
+}
+
+.shade-circle:active {
+    border: 3px solid #FB73A4;
+    border-width: 3px;
+    border-color: #FB73A4;
+}
+
+.shade-match-circle {
+    /* background-color: #FFA0C2; */
+    border-radius: 50%;
+    width: 2.5em;
+    height: 2.5em;
+    /* border: none; */
+    border: solid;
+    border-width: 1px;
+    background: none;
+    border-width: 1px;
+    border-color: #FFA0C2;
+}
+
+/* .shade-circle:focus {
+    border: 3px solid #FB73A4;
+    border-width: 3px;
+    border-color: #FB73A4;
+} */
+
+/* .shade-circle:active {
+    border: 2px solid #FB73A4;
+    border-width: 3px;
+    border-color: #FB73A4;
+} */
+
+
 /* search styling =========================================================== */
 
 #auto-box {
@@ -171,6 +233,13 @@ input {
 #search-box {
     width: 100%;
     /* flex: 1; */
+}
+
+#selected-shade {
+    display: flex;
+    flex-direction: row;
+    margin-top: 1.5em;
+    flex-wrap: wrap;
 }
 
 /* dislikes filter styling ================================================== */
@@ -215,6 +284,7 @@ input {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .dis-chip {
@@ -274,6 +344,12 @@ input {
 
 .episode-desc{
     font-family: 'DM Sans', sans-serif;
+}
+
+.shade-info {
+    flex-direction: row;
+    display: flex;
+    vertical-align: center;
 }
 
 /* filter styling ============================================================ */
@@ -342,6 +418,7 @@ input {
     margin-top: 0.5em;
     margin-bottom: 0.5em;
     align-items: flex-start;
+    flex-wrap: wrap;
 }
 
 .keyword-chip {
@@ -352,6 +429,7 @@ input {
     margin-top: 0.5em;
     display: flex;
     align-items: center;
+    max-width: fit-content;
 }
 
 /* buttons ===================================================================*/
@@ -465,4 +543,23 @@ input {
     margin-top: 0.5em;
     color:#FB73A4;
     font-size: 18px;
+}
+
+.tag-chips {
+    display: flex;
+    /* flex-wrap: wrap; */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.tag-chip {
+    background-color: #FFA0C2;
+    border-radius: 50px;
+    padding: 8px 16px;
+    margin-right: 0.5em;
+    margin-top: 0.5em;
+    display: flex;
+    align-items: center;
 }

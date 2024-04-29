@@ -128,12 +128,27 @@ def make_json(csv_list, jsonFilePath):
                 new_rows.update(rows)
                 new_rows["id"] = int(rows["id"])
                 del new_rows[""]
+                del new_rows["Unnamed: 0"]
 
                 new_rows["product"] = (
                     rows["product"]
                     .replace("ÃÂ´", "ô")
                     .replace("ÃÂ©", "é")
                     .replace("ÃÂ¨", "è")
+                    .replace("\u00c3\u0082\u00c2\u00b0", "°")
+                    .replace("\u00c3\u0083\u00c2\u009c", "Ü")
+                    .replace("ÃÂ", "")
+                )
+
+                new_rows["brand"] = (
+                    rows["brand"]
+                    .replace("ÃÂ´", "ô")
+                    .replace("ÃÂ©", "é")
+                    .replace("ÃÂ©", "é")
+                    .replace("ÃÂ¨", "è")
+                    .replace("\u00c3\u0082\u00c2\u00b0", "°")
+                    .replace("\u00c3\u0083\u00c2\u009c", "Ü")
+                    .replace("ÃÂ", "")
                 )
 
                 # if (
@@ -229,9 +244,15 @@ def make_json(csv_list, jsonFilePath):
                     new_shades = []
                     for shade in old_shades:
                         new_shade = {}
-                        new_shade["shade_name"] = shade[
-                            shade.index(":") + 3 : shade.index(",") - 1
-                        ]
+                        new_shade["shade_name"] = (
+                            shade[shade.index(":") + 3 : shade.index(",") - 1]
+                            .replace("ÃÂ´", "ô")
+                            .replace("ÃÂ©", "é")
+                            .replace("ÃÂ¨", "è")
+                            .replace("\u00c3\u0082\u00c2\u00b0", "°")
+                            .replace("\u00c3\u0083\u00c2\u009c", "Ü")
+                            .replace("ÃÂ", "")
+                        )
                         if "https" not in shade:
                             new_shade["shade_img"] = ""
                         else:
@@ -271,7 +292,15 @@ def make_json(csv_list, jsonFilePath):
 
                 data["products"].append(new_rows)
                 new_rows["summary"] = (
-                    rows["summary"].replace("Â·AÂ·", "A").replace("Ã©", "é")
+                    rows["summary"]
+                    .replace("Â·AÂ·", "A")
+                    .replace("Ã©", "é")
+                    .replace("ÃÂ´", "ô")
+                    .replace("ÃÂ©", "é")
+                    .replace("ÃÂ¨", "è")
+                    .replace("\u00c3\u0082\u00c2\u00b0", "°")
+                    .replace("\u00c3\u0083\u00c2\u009c", "Ü")
+                    .replace("ÃÂ", "")
                 )
                 if rows["tags"][1:-1] == "":
                     new_rows["tags"] = []

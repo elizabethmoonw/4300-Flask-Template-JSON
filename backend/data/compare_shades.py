@@ -23,9 +23,14 @@ def get_top_shades(shade_rgb, relevant_products):
     """
     best_shades = {}
     for product in relevant_products:
-        shade_info = relevant_products[product].replace(
-            'array(', '').replace(', dtype=uint8)', '').replace(', 255', '').replace('ÃƒÂ©', 'é').replace('ÃƒÂ¨', 'è').replace(
-                '[', '['
+        shade_info = (
+            relevant_products[product]
+            .replace("array(", "")
+            .replace(", dtype=uint8)", "")
+            .replace(", 255", "")
+            .replace("ÃƒÂ©", "é")
+            .replace("ÃƒÂ¨", "è")
+            .replace("[", "[")
         )  # .encode('latin1')
         # print(shade_info)
         try:
@@ -33,15 +38,21 @@ def get_top_shades(shade_rgb, relevant_products):
             shade_diff = np.zeros(len(shade_info))
             # print(product)
             for shade_i in range(len(shade_info)):
-                rgb = (shade_info[shade_i][2][0])
+                rgb = shade_info[shade_i][2][0]
                 if isinstance(rgb, int):
                     rgb = [rgb, rgb, rgb]
-                shade_diff[shade_i] = math.sqrt((rgb[0] - shade_rgb[0])**2 + (
-                    rgb[1] - shade_rgb[1])**2 + (rgb[2] - shade_rgb[2])**2) / math.sqrt(195075)
+                shade_diff[shade_i] = math.sqrt(
+                    (rgb[0] - shade_rgb[0]) ** 2
+                    + (rgb[1] - shade_rgb[1]) ** 2
+                    + (rgb[2] - shade_rgb[2]) ** 2
+                ) / math.sqrt(195075)
             closest_i = np.argmin(shade_diff)
             # print(shade_info[closest_i])
-            best_shades[product] = [shade_info[closest_i][0],
-                                    shade_info[closest_i][1], shade_info[closest_i][2][0]]
+            best_shades[product] = [
+                shade_info[closest_i][0],
+                shade_info[closest_i][1],
+                shade_info[closest_i][2][0],
+            ]
         except SyntaxError:
             continue
             # for i in shade_info:  # .split(','):

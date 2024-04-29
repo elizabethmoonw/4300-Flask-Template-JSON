@@ -3,7 +3,9 @@ import numpy as np
 import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.metrics.pairwise import cosine_similarity
+from sentence_transformers import util
 import os
+import math
 
 ingredient_mat = {}
 
@@ -60,8 +62,7 @@ def encode_ingredients(products_df):
     encoded_data = np.zeros((len(products_df), len(ingredient_index_map)))
 
     for i, product in products_df.iterrows():
-        encoded_data[i, :] = oh_encoder(
-            product["ingredients"], ingredient_index_map)
+        encoded_data[i, :] = oh_encoder(product["ingredients"], ingredient_index_map)
 
     return encoded_data
 
@@ -78,7 +79,9 @@ def create_tsne(products_df: pd.DataFrame, encoded_matrix):
 
 
 def reverse_product_idx(product: str, product_names: list):
-    return product_names.index(product)
+    if product in product_names:
+        return product_names.index(product)
+    return -1
 
 
 def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
@@ -95,7 +98,9 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
          A list of n most similar products
     """
     # Filter by category
-    # products_df = create_tsne(products_df)
+    if product_index == -1:
+        return pd.DataFrame()
+
     target_product = products_df.iloc[product_index]
     target_category = target_product["category"]
 
@@ -103,12 +108,7 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     products_df["ingredients_vector"] = products_df["ingredients"].apply(
         lambda x: oh_encoder(x, ingredient_index_map)
     )
-    same_category_products = products_df[products_df["category"]
-                                         == target_category]
-    # tsne_features = np.array(
-    #     [[p["X"], p["Y"]] for _, p in same_category_products.iterrows()]
-    # )
-    # target_feature = np.array([[target_product["X"], target_product["Y"]]])
+    same_category_products = products_df[products_df["category"] == target_category]
     vectors = np.array(
         [p["ingredients_vector"] for _, p in same_category_products.iterrows()]
     )
@@ -116,26 +116,19 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     target_feature = [products_df.iloc[product_index]["ingredients_vector"]]
     similarities = cosine_similarity(target_feature, vectors)[0]
 
-    # print(np.shape(target_feature))
-    # print(len(vectors[0]))
+    target_tags = products_df.iloc[product_index]["tag_vectors"]
+    tag_vectors = np.array(
+        [p["tag_vectors"] for _, p in same_category_products.iterrows()],
+        dtype=np.float32,
+    )
 
-    # target_tags = [products_df.iloc[product_index]["tag_vectors"]]
-    # tag_vectors = np.array(
-    #     [p["tag_vectors"] for _, p in same_category_products.iterrows()], dtype="object"
-    # )
-    # # tag_vectors = tag_vectors.reshape(-1, 1)
-
-    # print(np.shape(target_tags))
-    # for tv in tag_vectors:
-    #     print(len(tv))
-    # print((tag_vectors[0]))
-
+    tag_similarities = np.array(util.pytorch_cos_sim(target_tags, tag_vectors)).reshape(
+        similarities.shape
+    )
     # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
-    # similarities += tag_similarities
+    similarities = np.multiply(np.power(tag_similarities, 20), similarities)
 
-    # sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
     sorted_indices = np.argsort(similarities)[::-1][1:]
-    # print(sorted_indices)
     return same_category_products.iloc[sorted_indices]
 
 
@@ -209,3 +202,114 @@ def load_products(file_path):
 
 def create_ingredient_mat(products_df):
     ingredient_mat = ingredient_idx(products_df)
+
+
+def get_top_shades(shade_rgb, relevant_products):
+    """
+    Given a shade and list of relevant products, return the closest shades for each relevant products
+    ----------
+    shade_rgb : list
+        A list containing the 3-tuple RGB value
+    products : dict
+        A dict of relevant product as keys and their shade information as values
+    Returns
+    -------
+    dict
+        dict mapping product name to tuple containing (list of rgb, product name)
+    """
+    # print(shade_rgb)
+    # print(relevant_products)
+    best_shades = {}
+    if shade_rgb == []:
+        return best_shades
+
+    for ind in relevant_products.index:
+        product = relevant_products["product"][ind]
+        shade_info = relevant_products["shades"][ind]
+        # print(shade_info)
+        try:
+            shade_diff = np.ones(len(shade_info))
+            for shade_i in range(len(shade_info)):
+                rgb = shade_info[shade_i]["shade_rgb"]
+                if len(rgb) > 0:
+                    shade_diff[shade_i] = math.sqrt(
+                        (rgb[0] - shade_rgb[0]) ** 2
+                        + (rgb[1] - shade_rgb[1]) ** 2
+                        + (rgb[2] - shade_rgb[2]) ** 2
+                    ) / math.sqrt(195075)
+            try:
+                closest_i = np.argmin(shade_diff)
+                if shade_diff[closest_i] == 1:
+                    continue
+                else:
+                    best_shades[product] = (
+                        shade_info[closest_i]["shade_rgb"],
+                        shade_info[closest_i]["shade_name"],
+                    )
+            except:
+                continue
+        except SyntaxError:
+            continue
+
+    # print(best_shades)
+    return best_shades
+
+
+def filter_shades(shade_matches, top_10_df):
+    """
+    If result product has a closest shade, add the shade to the result
+    ----------
+    shade_matches : dict
+        dict mapping product name to tuple containing (list of rgb, product name)
+    top_10_df : dataframe
+        dataframe of length 10 with top 10 similar products
+    Returns
+    -------
+    dataframe
+        dataframe with two new columns: closest_shade_name and closest_shade_rgb
+    """
+    new_shade_names = []
+    new_shade_rgbs = []
+    for ind in top_10_df.index:
+        product = top_10_df["product"][ind]
+        if product in shade_matches:
+            raw_shade_name = shade_matches[product][1]
+            print("raw " + raw_shade_name)
+            brand = top_10_df["brand"][ind]
+            print("brand " + brand)
+            # new_shade_names.append(shade_matches[product][1])
+            new_shade_rgbs.append(shade_matches[product][0])
+            try:
+                prod_name = product[product.index(brand) + len(brand) + 1 :]
+                print(prod_name)
+                new_shade_name = raw_shade_name[
+                    : shade_matches[product][1].index(prod_name) - 1
+                ]
+                new_shade_names.append(new_shade_name)
+            except:
+                new_shade_names.append("")
+                new_shade_rgbs.append([])
+        else:
+            new_shade_names.append("")
+            new_shade_rgbs.append([])
+            # top_10_df.loc[top_10_df["product"] == product, "closest_shade_name"] = (
+            #     shade_matches[product][1]
+            # )
+            # top_10_df.loc[top_10_df["product"] == product, "closest_shade_rgb"] = (
+            #     shade_matches[product][0]
+            # )
+    top_10_df["closest_shade_name"] = new_shade_names
+    top_10_df["closest_shade_rgb"] = new_shade_rgbs
+    print(top_10_df)
+    return top_10_df
+
+
+BASE_DIR = os.path.abspath(".")
+DATASET_DIR = os.path.join(BASE_DIR, "data")
+products_file_path = os.path.join(DATASET_DIR, "tagged_products.csv")
+
+products_df = load_products(products_file_path)
+
+encoded_matrix = encode_ingredients(products_df)
+save_encoded_matrix(encoded_matrix)
+load_encoded_matrix()

@@ -10,7 +10,10 @@ from utils import (
     find_most_similar_cosine_filtered,
     ingredient_boolean_search,
     create_ingredient_mat,
+    get_top_shades,
+    filter_shades,
 )
+
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -81,7 +84,7 @@ def csv_search(query):
     return matches_filtered_json
 
 
-def results_search(query, min_price, max_price, product, dislikes):
+def results_search(query, min_price, max_price, product, dislikes, shade):
     # matches = []
     # matches = df[(df["product"].str.lower().str.contains(query.lower()))]
     # print("before matches")
@@ -91,6 +94,10 @@ def results_search(query, min_price, max_price, product, dislikes):
     best_matches = find_most_similar_cosine_filtered(
         reverse_product_idx(product, product_names), df
     )
+
+    if best_matches.size == 0:
+        return best_matches.to_json(orient="records")
+
     if len(dislikes) != 0:
         dislikes_list = dislikes[0].split(",")
         ingred_filtered = ingredient_boolean_search(best_matches, dislikes_list)
@@ -101,6 +108,13 @@ def results_search(query, min_price, max_price, product, dislikes):
         (ingred_filtered["price"] >= min_price)
         & (ingred_filtered["price"] <= max_price)
     ][:10]
+    if shade == "" or "undefined" in shade:
+        shade_list = []
+    else:
+        shade_list = [int(x) for x in shade.split(",")]
+    shade_matches = get_top_shades(shade_list, filter_matches)
+    # print(shade_matches)
+    filter_matches = filter_shades(shade_matches, filter_matches)
     # print("after matches")
     matches_filtered = filter_matches[
         [
@@ -112,6 +126,9 @@ def results_search(query, min_price, max_price, product, dislikes):
             "avg_rating",
             "reviews",
             "summary",
+            "closest_shade_name",
+            "closest_shade_rgb",
+            "tags",
         ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
@@ -146,10 +163,26 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
             "avg_rating",
             "reviews",
             "summary",
+            "tags",
         ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
     return matches_filtered_json
+
+
+def shade_search(product):
+    # print("product " + product)
+    product_row = df.loc[
+        df["product"].str.lower().str.strip() == product.lower().strip()
+    ].iloc[0]
+    # print(product_row)
+    if len(product_row["shades"]) != 0:
+        # print([shade["shade_rgb"] for shade in product_row["shades"]])
+        return [
+            [shade["shade_rgb"], shade["shade_name"]] for shade in product_row["shades"]
+        ]
+    else:
+        return []
 
 
 @app.route("/")
@@ -172,8 +205,9 @@ def filter_search():
     min_price = float(request.args.get("minPrice"))
     max_price = float(request.args.get("maxPrice"))
     product = request.args.get("product")
+    shade = request.args.get("shade")
     return results_search(
-        input_keywords[0], min_price, max_price, product, input_dislikes
+        input_keywords[0], min_price, max_price, product, input_dislikes, shade
     )
 
 
@@ -198,6 +232,12 @@ def searchProducts():
 def searchIngredients():
     text = request.args.get("title")
     return dislike_search(text)
+
+
+@app.route("/shades")
+def searchShades():
+    text = request.args.get("title")
+    return shade_search(text)
 
 
 if "DB_NAME" not in os.environ:
