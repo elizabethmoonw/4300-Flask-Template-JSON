@@ -1,6 +1,8 @@
 const productSearchBox = document.querySelector("#search-box");
 const productAutoBox = document.querySelector("#auto-box");
 const productInputBox = document.querySelector("#prod-search-text");
+const shadeBox = document.querySelector("#shade-box");
+const selectedShade = document.querySelector("#selected-shade");
 
 const disSearchBox = document.querySelector("#dis-search-box");
 const disAutoBox = document.querySelector("#dis-auto-box");
@@ -19,6 +21,8 @@ const loader = document.querySelector("#loader");
 
 var dislike_chips = [];
 var filter_chips = [];
+var selected_shade = [];
+selectedShade.style.marginTop = "0em";
 
 function answerBoxTemplate(
   product,
@@ -86,6 +90,74 @@ function filterText() {
     );
 }
 
+function selectShade(shade, color, name) {
+  // getShades(product);
+  // shade.style.border = "2px solid #FB73A4";
+
+  // shade.innerHTML =
+  //   "<button class='shade-circle' style='background-color: " +
+  //   color +
+  //   "; border: 3px solid #FB73A4;'/>";
+  selected_shade = color
+    .substring(color.indexOf("(") + 1, color.indexOf(")"))
+    .split(" ");
+  console.log(selected_shade);
+  selectedShade.hidden = false;
+  selectedShade.style.marginTop = "1.5em";
+  selectedShade.innerHTML =
+    "<p class='body-text'>Selected shade: </p><p class='shade-circle' style='background-color: " +
+    color +
+    "; border: 3px solid #FB73A4; height: 2em; width: 2em; margin-left: 1em;  margin-top: -0.5em; cursor: auto;'/>\
+    <p class='body-text' style='overflow: wrap; margin-left: 1em;'>" +
+    name +
+    "</p>";
+  // <p class='body-text' style='margin-left: 1em;'>" +
+  // name +
+  // "</p>";
+}
+
+function getShades(product) {
+  shadeBox.innerHTML = "";
+  fetch(
+    "/shades?" +
+      new URLSearchParams({
+        title: product,
+      }).toString()
+  )
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((row) => {
+        if (row.length != 0) {
+          let tempDiv = document.createElement("div");
+          let shade_rgb = row[0];
+          let shade_name = row[1];
+          // console.log(row);
+          let rgb_string =
+            "rgb(" +
+            shade_rgb[0] +
+            " " +
+            shade_rgb[1] +
+            " " +
+            shade_rgb[2] +
+            ")";
+          // console.log(rgb_string);
+          tempDiv.innerHTML =
+            "<button class='shade-circle' style='background-color: " +
+            rgb_string +
+            ";'/>";
+          // tempDiv.innerHTML += `<img src=${row.img_link}></img>`;
+          // tempDiv.innerHTML += "<>";
+          tempDiv.setAttribute(
+            "onclick",
+            "selectShade(this, '" + rgb_string + "', '" + shade_name + "')"
+          );
+          shadeBox.appendChild(tempDiv);
+        }
+      });
+      shadeBox.hidden = false;
+    });
+}
+
 function setProductClickable(list) {
   for (let i = 0; i < list.length; i++) {
     list[i].setAttribute("onclick", "selectProduct(this)");
@@ -98,6 +170,11 @@ function selectProduct(element) {
   productInputBox.value = selectUserData;
   productSearchBox.classList.remove("active");
   productAutoBox.hidden = true;
+  shadeBox.innerHTML = "";
+  selectedShade.innerHTML = "";
+  selectedShade.hidden = true;
+  getShades(selectUserData);
+  // if shades list not empty, show shades
 }
 
 async function matchProducts() {
@@ -127,6 +204,10 @@ async function showProducts() {
     setProductClickable(allList);
   } else {
     productSearchBox.classList.remove("active");
+    selected_shade.innerHTML = "";
+    selected_shade.hidden = true;
+    shadeBox.innerHTML = "";
+    selected_shade = [];
     productAutoBox.hidden = true;
   }
 }
@@ -278,6 +359,7 @@ function getResults() {
           keywords: filter_chips,
           minPrice: minPrice,
           maxPrice: maxPrice,
+          shade: selected_shade,
         }).toString()
     )
       .then((response) => response.json())
@@ -322,6 +404,7 @@ function getResults() {
           keywords: filter_chips,
           minPrice: minPrice,
           maxPrice: maxPrice,
+          shade: selected_shade,
         }).toString()
     )
       .then((response) => response.json())

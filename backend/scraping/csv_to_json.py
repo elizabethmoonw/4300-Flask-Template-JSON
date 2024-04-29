@@ -128,12 +128,14 @@ def make_json(csv_list, jsonFilePath):
                 new_rows.update(rows)
                 new_rows["id"] = int(rows["id"])
                 del new_rows[""]
+                del new_rows["Unnamed: 0"]
 
                 new_rows["product"] = (
                     rows["product"]
                     .replace("ÃÂ´", "ô")
                     .replace("ÃÂ©", "é")
                     .replace("ÃÂ¨", "è")
+                    .replace("\u00c3\u0083\u00c2\u009c", "Ü")
                 )
 
                 # if (
@@ -271,7 +273,13 @@ def make_json(csv_list, jsonFilePath):
 
                 data["products"].append(new_rows)
                 new_rows["summary"] = (
-                    rows["summary"].replace("Â·AÂ·", "A").replace("Ã©", "é")
+                    rows["summary"]
+                    .replace("Â·AÂ·", "A")
+                    .replace("Ã©", "é")
+                    .replace("ÃÂ´", "ô")
+                    .replace("ÃÂ©", "é")
+                    .replace("ÃÂ¨", "è")
+                    .replace("\u00c3\u0083\u00c2\u009c", "Ü")
                 )
                 if rows["tags"][1:-1] == "":
                     new_rows["tags"] = []

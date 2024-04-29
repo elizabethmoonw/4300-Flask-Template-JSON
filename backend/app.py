@@ -10,7 +10,9 @@ from utils import (
     find_most_similar_cosine_filtered,
     ingredient_boolean_search,
     create_ingredient_mat,
+    get_top_shades,
 )
+
 
 # ROOT_PATH for linking with all your files.
 # Feel free to use a config.py or settings.py with a global export variable
@@ -81,7 +83,7 @@ def csv_search(query):
     return matches_filtered_json
 
 
-def results_search(query, min_price, max_price, product, dislikes):
+def results_search(query, min_price, max_price, product, dislikes, shade):
     # matches = []
     # matches = df[(df["product"].str.lower().str.contains(query.lower()))]
     # print("before matches")
@@ -101,6 +103,9 @@ def results_search(query, min_price, max_price, product, dislikes):
         (ingred_filtered["price"] >= min_price)
         & (ingred_filtered["price"] <= max_price)
     ][:10]
+    if len(shade) != 0:
+        shade_matches = get_top_shades(shade, filter_matches)
+        print(shade_matches)
     # print("after matches")
     matches_filtered = filter_matches[
         [
@@ -152,6 +157,21 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
     return matches_filtered_json
 
 
+def shade_search(product):
+    # print("product " + product)
+    product_row = df.loc[
+        df["product"].str.lower().str.strip() == product.lower().strip()
+    ].iloc[0]
+    # print(product_row)
+    if len(product_row["shades"]) != 0:
+        # print([shade["shade_rgb"] for shade in product_row["shades"]])
+        return [
+            [shade["shade_rgb"], shade["shade_name"]] for shade in product_row["shades"]
+        ]
+    else:
+        return []
+
+
 @app.route("/")
 def home():
     return render_template("base.html", title="sample html")
@@ -172,8 +192,9 @@ def filter_search():
     min_price = float(request.args.get("minPrice"))
     max_price = float(request.args.get("maxPrice"))
     product = request.args.get("product")
+    shade = request.args.get("shade")
     return results_search(
-        input_keywords[0], min_price, max_price, product, input_dislikes
+        input_keywords[0], min_price, max_price, product, input_dislikes, shade
     )
 
 
@@ -185,7 +206,10 @@ def suggestion_search():
     input_keywords = [keywords]
     min_price = float(request.args.get("minPrice"))
     max_price = float(request.args.get("maxPrice"))
-    return suggest_search(input_keywords[0], min_price, max_price, input_dislikes)
+    shade = request.args.get("shade")
+    return suggest_search(
+        input_keywords[0], min_price, max_price, input_dislikes, shade
+    )
 
 
 @app.route("/search")
@@ -198,6 +222,12 @@ def searchProducts():
 def searchIngredients():
     text = request.args.get("title")
     return dislike_search(text)
+
+
+@app.route("/shades")
+def searchShades():
+    text = request.args.get("title")
+    return shade_search(text)
 
 
 if "DB_NAME" not in os.environ:

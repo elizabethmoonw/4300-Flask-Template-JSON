@@ -3,6 +3,7 @@ import pandas as pd
 from sklearn.manifold import TSNE
 from sklearn.metrics.pairwise import cosine_similarity
 import os
+import math
 
 ingredient_mat = {}
 
@@ -197,6 +198,45 @@ def load_products(file_path):
 
 def create_ingredient_mat(products_df):
     ingredient_mat = ingredient_idx(products_df)
+
+
+def get_top_shades(shade_rgb, relevant_products):
+    """
+    Given a shade and list of relevant products, return the closest shades for each relevant products
+    ----------
+    shade_rgb : list
+        A list containing the 3-tuple RGB value
+    products : dict
+        A dict of relevant product as keys and their shade information as values
+    Returns
+    -------
+    dict
+        dict mapping product name to tuple containing (list of rgb, product name)
+    """
+    # print(shade_rgb)
+    # print(relevant_products)
+    best_shades = {}
+    for ind in relevant_products.index:
+        product = relevant_products["product"][ind]
+        shade_info = relevant_products["shades"][ind]
+        try:
+            shade_diff = np.zeros(len(shade_info))
+            for shade_i in range(len(shade_info)):
+                rgb = shade_info[shade_i]["shade_rgb"]
+                shade_diff[shade_i] = math.sqrt(
+                    (rgb[0] - shade_rgb[0]) ** 2
+                    + (rgb[1] - shade_rgb[1]) ** 2
+                    + (rgb[2] - shade_rgb[2]) ** 2
+                ) / math.sqrt(195075)
+            closest_i = np.argmin(shade_diff)
+            best_shades[product] = (
+                shade_info[closest_i]["shade_rgb"],
+                shade_info[closest_i]["shade_name"],
+            )
+        except SyntaxError:
+            continue
+
+    return best_shades
 
 
 BASE_DIR = os.path.abspath(".")
