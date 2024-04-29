@@ -69,11 +69,11 @@ function answerBoxTemplate(
         </div>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
         <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
-        <div class='product-name'><b>Did you like this result? </b>
+        ${tags_string}
+        <div class='product-name' style='margin-top: 0.5em;'><b>Did you like this result? </b>
           <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
           <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
         </div>
-        ${tags_string}
       </div>
   </div>`;
 }
@@ -372,10 +372,15 @@ function getResults() {
     // product = productInputBox.value;
     dislikes = dislike_chips;
     keywords = filter_chips;
+    selected_shade = [];
 
     loader.hidden = false;
+    results = document.createElement("div");
+    results.innerHTML =
+      "<h3 style='margin-bottom: 1em;'>Here are some products you might like:</h3>";
+    answerBox.appendChild(results);
 
-    console.log(loader.innerHTML);
+    // console.log(loader.innerHTML);
     fetch(
       "/suggest?" +
         new URLSearchParams({
@@ -391,9 +396,13 @@ function getResults() {
       .then((data) => {
         data.forEach((row) => {
           let tempDiv = document.createElement("div");
-          var review = row.reviews[0];
-          if (review.length > 250) {
-            review = review.substring(0, 250) + "...";
+          if (row.reviews.length != 0) {
+            review = row.reviews[0];
+            if (review.length > 250) {
+              review = review.substring(0, 250) + "...";
+            }
+          } else {
+            review = "";
           }
           tempDiv.innerHTML = answerBoxTemplate(
             row.product,
@@ -412,6 +421,7 @@ function getResults() {
           answerBox.appendChild(tempDiv);
         });
         loader.hidden = true;
+        answerBox.scrollIntoView({ behavior: "smooth" });
       });
   } else {
     answerBox.innerHTML = "";
@@ -425,6 +435,51 @@ function getResults() {
     loader.hidden = false;
 
     // console.log(loader.innerHTML);
+    fetch(
+      "/product?" +
+        new URLSearchParams({
+          title: product,
+        }).toString()
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        // console.log(row);
+        data.forEach((row) => {
+          // console.log(row);
+          input_prod = document.createElement("div");
+          input_prod.innerHTML = `<h3 style='margin-bottom: 1em;'>You searched for:</h3>`;
+          answerBox.appendChild(input_prod);
+          let tempDiv = document.createElement("div");
+          if (row.reviews.length != 0) {
+            review = row.reviews[0];
+            if (review.length > 250) {
+              review = review.substring(0, 250) + "...";
+            }
+          } else {
+            review = "";
+          }
+          rgb_string = "";
+          tempDiv.innerHTML = answerBoxTemplate(
+            row.product,
+            row.link,
+            row.price,
+            row.img_link,
+            formatIngredients(row.ingredients),
+            review,
+            row.avg_rating,
+            row.summary,
+            rgb_string,
+            row.closest_shade_name,
+            "hidden",
+            row.tags
+          );
+          answerBox.appendChild(tempDiv);
+          results = document.createElement("div");
+          results.innerHTML =
+            "<h3 style='margin-bottom: 1em;'>Here are some similar products:</h3>";
+          answerBox.appendChild(results);
+        });
+      });
     fetch(
       "/filter?" +
         new URLSearchParams({
@@ -446,6 +501,7 @@ function getResults() {
           loader.hidden = true;
         } else {
           data.forEach((row) => {
+            // console.log(row);
             let tempDiv = document.createElement("div");
             var review = row.reviews[0];
             if (review.length > 250) {
@@ -453,10 +509,10 @@ function getResults() {
             }
             hidden = "style='cursor: auto;'";
             rgb_string = "";
-            console.log(row.closest_shade_rgb);
+            // console.log(row.closest_shade_rgb);
             if (row.closest_shade_rgb.length == 0) {
               hidden = "hidden";
-              console.log("hidden");
+              // console.log("hidden");
             } else {
               rgb_string =
                 "rgb(" +
@@ -484,6 +540,7 @@ function getResults() {
             answerBox.appendChild(tempDiv);
           });
           loader.hidden = true;
+          answerBox.scrollIntoView({ behavior: "smooth" });
         }
       });
   }

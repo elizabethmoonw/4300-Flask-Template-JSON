@@ -288,6 +288,7 @@ def make_json(csv_list, jsonFilePath):
                 new_reviews = list(
                     filter(lambda x: "Comments about " not in x, new_reviews)
                 )
+                new_reviews = [re.sub(r"\\\\+", "", review) for review in new_reviews]
                 new_rows["reviews"] = new_reviews
 
                 data["products"].append(new_rows)

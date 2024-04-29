@@ -5,6 +5,7 @@ from flask_cors import CORS
 from helpers.MySQLDatabaseHandler import MySQLDatabaseHandler
 import pandas as pd
 from sentence_transformers import SentenceTransformer, util
+import numpy as np
 from utils import (
     reverse_product_idx,
     find_most_similar_cosine_filtered,
@@ -25,6 +26,7 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 # Specify the path to the JSON file relative to the current script
 json_file_path = os.path.join(current_directory, "init.json")
 ingredient_file_path = os.path.join(current_directory, "dislikes.json")
+tag_file_path = os.path.join(current_directory, "tags.json")
 
 eyes_csv_path = os.path.join(current_directory, "scraping/eyes_ulta_data.csv")
 
@@ -41,6 +43,10 @@ with open(json_file_path, "r") as file:
 with open(ingredient_file_path, "r") as file:
     data = json.load(file)
     ingredients_df = pd.DataFrame(data)
+
+with open(tag_file_path, "r") as file:
+    data = json.load(file)
+    tags_df = pd.DataFrame(data)
 
 eyes_df = pd.read_csv(eyes_csv_path)
 
@@ -147,12 +153,71 @@ def dislike_search(query):
 
 
 def suggest_search(input_keyword, min_price, max_price, input_dislikes):
-    matches = df[(df["product"].str.lower().str.contains(input_keyword.lower()))]
+    category = ""
+    makeup_types = [
+        "foundation",
+        "face-powder",
+        "face powder",
+        "concealer",
+        "face-primer",
+        "face primer",
+        "bb-cc-creams",
+        "bb cream",
+        "cc cream",
+        "blush",
+        "bronzer",
+        "contouring",
+        "highlighter",
+        "lipstick",
+        "lip-gloss",
+        "lip gloss",
+        "lip-oil",
+        "lip oil",
+        "lip-liner",
+        "lip liner",
+        "lip-stain",
+        "lip stain",
+        "lip-balms-treatments",
+        "lip balm",
+        "eyeshadow-palettes",
+        "eyeshadow palettes",
+        "mascara",
+        "eyeliner",
+        "eyebrows",
+        "eyeshadow",
+    ]
+    for cat in makeup_types:
+        if cat in input_keyword:
+            category = cat
+
+    matches = df
+    if category != "":
+        matches = df.loc[matches["category"] == category]
+
+    # matches = df[(df["product"].str.lower().str.contains(input_keyword.lower()))]
+
     ingred_filtered = ingredient_boolean_search(matches, input_dislikes)
     filter_matches = ingred_filtered[
         (ingred_filtered["price"] >= min_price)
         & (ingred_filtered["price"] <= max_price)
-    ][:10]
+    ]
+    input_keyword = input_keyword.split(",")
+    model = SentenceTransformer("all-MiniLM-L6-v2")
+    input_embeddings = model.encode(input_keyword)
+    product_tags = filter_matches["tags"]
+    similarities = np.zeros((len(filter_matches)))
+    for kw in input_embeddings:
+        for i, product in enumerate(list(product_tags)):
+            for j, tag in enumerate(list(product)):
+                sim = util.pytorch_cos_sim(
+                    np.array(kw, dtype=np.float32),
+                    np.array(tags_df[tag], dtype=np.float32),
+                )
+                if sim[0][0] > 0.8:
+                    similarities[i] += sim
+    sorted_indices = np.argsort(similarities)[::-1][:10]
+    filter_matches = filter_matches.iloc[sorted_indices]
+
     matches_filtered = filter_matches[
         [
             "product",
@@ -185,6 +250,37 @@ def shade_search(product):
         return []
 
 
+def prod_search(product):
+    # print("product " + product)
+    match = df.loc[
+        df["product"].str.lower().str.strip() == product.lower().strip()
+    ].iloc[:1]
+
+    if match.empty:
+        return match.to_json(orient="records")
+
+    match["closest_shade_name"] = [""]
+    match["closest_shade_rgb"] = [[]]
+    # print(match)
+    match_filtered = match[
+        [
+            "product",
+            "link",
+            "price",
+            "img_link",
+            "ingredients",
+            "avg_rating",
+            "reviews",
+            "summary",
+            "closest_shade_name",
+            "closest_shade_rgb",
+            "tags",
+        ]
+    ]
+    match_filtered_json = match_filtered.to_json(orient="records")
+    return match_filtered_json
+
+
 @app.route("/")
 def home():
     return render_template("base.html", title="sample html")
@@ -194,6 +290,12 @@ def home():
 def episodes_search():
     text = request.args.get("title")
     return csv_search(text)
+
+
+@app.route("/product")
+def product_search():
+    text = request.args.get("title")
+    return prod_search(text)
 
 
 @app.route("/filter")
