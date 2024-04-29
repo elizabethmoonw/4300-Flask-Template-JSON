@@ -123,7 +123,8 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
 
     target_tags = products_df.iloc[product_index]["tag_vectors"]
     tag_vectors = np.array(
-        [p["tag_vectors"] for _, p in same_category_products.iterrows()], dtype="object"
+        [p["tag_vectors"] for _, p in same_category_products.iterrows()],
+        dtype=np.float32,
     )
 
     tag_similarities = util.pytorch_cos_sim(target_tags, tag_vectors)
