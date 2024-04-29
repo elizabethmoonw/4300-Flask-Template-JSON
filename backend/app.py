@@ -147,12 +147,56 @@ def dislike_search(query):
 
 
 def suggest_search(input_keyword, min_price, max_price, input_dislikes):
-    matches = df[(df["product"].str.lower().str.contains(input_keyword.lower()))]
+    category = ""
+    makeup_types = [
+        "foundation",
+        "face-powder",
+        "face powder",
+        "concealer",
+        "face-primer",
+        "face primer",
+        "bb-cc-creams",
+        "bb cream",
+        "cc cream",
+        "blush",
+        "bronzer",
+        "contouring",
+        "highlighter",
+        "lipstick",
+        "lip-gloss",
+        "lip gloss",
+        "lip-oil",
+        "lip oil",
+        "lip-liner",
+        "lip liner",
+        "lip-stain",
+        "lip stain",
+        "lip-balms-treatments",
+        "lip balm",
+        "eyeshadow-palettes",
+        "eyeshadow palettes",
+        "mascara",
+        "eyeliner",
+        "eyebrows",
+        "eyeshadow",
+    ]
+    for cat in makeup_types:
+        if cat in input_keyword:
+            category = cat
+    print(category)
+
+    matches = df
+    if category != "":
+        matches = df.loc[matches["category"] == category]
+
+    # matches = df[(df["product"].str.lower().str.contains(input_keyword.lower()))]
+
     ingred_filtered = ingredient_boolean_search(matches, input_dislikes)
     filter_matches = ingred_filtered[
         (ingred_filtered["price"] >= min_price)
         & (ingred_filtered["price"] <= max_price)
     ][:10]
+
     matches_filtered = filter_matches[
         [
             "product",
