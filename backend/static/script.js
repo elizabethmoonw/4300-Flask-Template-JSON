@@ -69,11 +69,11 @@ function answerBoxTemplate(
         </div>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
         <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
-        <div class='product-name'><b>Did you like this result? </b>
+        ${tags_string}
+        <div class='product-name' style='margin-top: 0.5em;'><b>Did you like this result? </b>
           <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
           <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
         </div>
-        ${tags_string}
       </div>
   </div>`;
 }
@@ -421,6 +421,7 @@ function getResults() {
           answerBox.appendChild(tempDiv);
         });
         loader.hidden = true;
+        answerBox.scrollIntoView({ behavior: "smooth" });
       });
   } else {
     answerBox.innerHTML = "";
@@ -539,6 +540,7 @@ function getResults() {
             answerBox.appendChild(tempDiv);
           });
           loader.hidden = true;
+          answerBox.scrollIntoView({ behavior: "smooth" });
         }
       });
   }

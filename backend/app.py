@@ -186,13 +186,17 @@ def shade_search(product):
 
 
 def prod_search(product):
-    print("product " + product)
+    # print("product " + product)
     match = df.loc[
         df["product"].str.lower().str.strip() == product.lower().strip()
     ].iloc[:1]
+
+    if match.empty:
+        return match.to_json(orient="records")
+
     match["closest_shade_name"] = [""]
     match["closest_shade_rgb"] = [[]]
-    print(match)
+    # print(match)
     match_filtered = match[
         [
             "product",
