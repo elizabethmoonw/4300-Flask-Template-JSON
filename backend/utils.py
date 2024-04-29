@@ -78,7 +78,9 @@ def create_tsne(products_df: pd.DataFrame, encoded_matrix):
 
 
 def reverse_product_idx(product: str, product_names: list):
-    return product_names.index(product)
+    if product in product_names:
+        return product_names.index(product)
+    return -1
 
 
 def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
@@ -96,6 +98,9 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     """
     # Filter by category
     # products_df = create_tsne(products_df)
+    if product_index == -1:
+        return pd.DataFrame()
+
     target_product = products_df.iloc[product_index]
     target_category = target_product["category"]
 
@@ -226,27 +231,88 @@ def get_top_shades(shade_rgb, relevant_products):
     # print(shade_rgb)
     # print(relevant_products)
     best_shades = {}
+    if shade_rgb == []:
+        return best_shades
+
     for ind in relevant_products.index:
         product = relevant_products["product"][ind]
         shade_info = relevant_products["shades"][ind]
+        # print(shade_info)
         try:
-            shade_diff = np.zeros(len(shade_info))
+            shade_diff = np.ones(len(shade_info))
             for shade_i in range(len(shade_info)):
                 rgb = shade_info[shade_i]["shade_rgb"]
-                shade_diff[shade_i] = math.sqrt(
-                    (rgb[0] - shade_rgb[0]) ** 2
-                    + (rgb[1] - shade_rgb[1]) ** 2
-                    + (rgb[2] - shade_rgb[2]) ** 2
-                ) / math.sqrt(195075)
-            closest_i = np.argmin(shade_diff)
-            best_shades[product] = (
-                shade_info[closest_i]["shade_rgb"],
-                shade_info[closest_i]["shade_name"],
-            )
+                if len(rgb) > 0:
+                    shade_diff[shade_i] = math.sqrt(
+                        (rgb[0] - shade_rgb[0]) ** 2
+                        + (rgb[1] - shade_rgb[1]) ** 2
+                        + (rgb[2] - shade_rgb[2]) ** 2
+                    ) / math.sqrt(195075)
+            try:
+                closest_i = np.argmin(shade_diff)
+                if shade_diff[closest_i] == 1:
+                    continue
+                else:
+                    best_shades[product] = (
+                        shade_info[closest_i]["shade_rgb"],
+                        shade_info[closest_i]["shade_name"],
+                    )
+            except:
+                continue
         except SyntaxError:
             continue
 
+    # print(best_shades)
     return best_shades
+
+
+def filter_shades(shade_matches, top_10_df):
+    """
+    If result product has a closest shade, add the shade to the result
+    ----------
+    shade_matches : dict
+        dict mapping product name to tuple containing (list of rgb, product name)
+    top_10_df : dataframe
+        dataframe of length 10 with top 10 similar products
+    Returns
+    -------
+    dataframe
+        dataframe with two new columns: closest_shade_name and closest_shade_rgb
+    """
+    new_shade_names = []
+    new_shade_rgbs = []
+    for ind in top_10_df.index:
+        product = top_10_df["product"][ind]
+        if product in shade_matches:
+            raw_shade_name = shade_matches[product][1]
+            print("raw " + raw_shade_name)
+            brand = top_10_df["brand"][ind]
+            print("brand " + brand)
+            # new_shade_names.append(shade_matches[product][1])
+            new_shade_rgbs.append(shade_matches[product][0])
+            try:
+                prod_name = product[product.index(brand) + len(brand) + 1 :]
+                print(prod_name)
+                new_shade_name = raw_shade_name[
+                    : shade_matches[product][1].index(prod_name) - 1
+                ]
+                new_shade_names.append(new_shade_name)
+            except:
+                new_shade_names.append("")
+                new_shade_rgbs.append([])
+        else:
+            new_shade_names.append("")
+            new_shade_rgbs.append([])
+            # top_10_df.loc[top_10_df["product"] == product, "closest_shade_name"] = (
+            #     shade_matches[product][1]
+            # )
+            # top_10_df.loc[top_10_df["product"] == product, "closest_shade_rgb"] = (
+            #     shade_matches[product][0]
+            # )
+    top_10_df["closest_shade_name"] = new_shade_names
+    top_10_df["closest_shade_rgb"] = new_shade_rgbs
+    print(top_10_df)
+    return top_10_df
 
 
 BASE_DIR = os.path.abspath(".")

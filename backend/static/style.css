@@ -154,8 +154,9 @@ input {
     width: 2.5em;
     height: 2.5em;
     cursor: pointer;
-    border: none;
-    border-width: 0px;
+    border: solid;
+    border-width: 1px;
+    border-color: #FFA0C2;
     background: none;
 }
 
@@ -169,6 +170,19 @@ input {
     border: 3px solid #FB73A4;
     border-width: 3px;
     border-color: #FB73A4;
+}
+
+.shade-match-circle {
+    /* background-color: #FFA0C2; */
+    border-radius: 50%;
+    width: 2.5em;
+    height: 2.5em;
+    /* border: none; */
+    border: solid;
+    border-width: 1px;
+    background: none;
+    border-width: 1px;
+    border-color: #FFA0C2;
 }
 
 /* .shade-circle:focus {
@@ -329,6 +343,12 @@ input {
 
 .episode-desc{
     font-family: 'DM Sans', sans-serif;
+}
+
+.shade-info {
+    flex-direction: row;
+    display: flex;
+    vertical-align: center;
 }
 
 /* filter styling ============================================================ */

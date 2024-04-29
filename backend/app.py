@@ -11,6 +11,7 @@ from utils import (
     ingredient_boolean_search,
     create_ingredient_mat,
     get_top_shades,
+    filter_shades,
 )
 
 
@@ -93,6 +94,10 @@ def results_search(query, min_price, max_price, product, dislikes, shade):
     best_matches = find_most_similar_cosine_filtered(
         reverse_product_idx(product, product_names), df
     )
+
+    if best_matches.size == 0:
+        return best_matches.to_json(orient="records")
+
     if len(dislikes) != 0:
         dislikes_list = dislikes[0].split(",")
         ingred_filtered = ingredient_boolean_search(best_matches, dislikes_list)
@@ -103,9 +108,13 @@ def results_search(query, min_price, max_price, product, dislikes, shade):
         (ingred_filtered["price"] >= min_price)
         & (ingred_filtered["price"] <= max_price)
     ][:10]
-    if len(shade) != 0:
-        shade_matches = get_top_shades(shade, filter_matches)
-        print(shade_matches)
+    if shade == "" or "undefined" in shade:
+        shade_list = []
+    else:
+        shade_list = [int(x) for x in shade.split(",")]
+    shade_matches = get_top_shades(shade_list, filter_matches)
+    # print(shade_matches)
+    filter_matches = filter_shades(shade_matches, filter_matches)
     # print("after matches")
     matches_filtered = filter_matches[
         [
@@ -117,6 +126,8 @@ def results_search(query, min_price, max_price, product, dislikes, shade):
             "avg_rating",
             "reviews",
             "summary",
+            "closest_shade_name",
+            "closest_shade_rgb",
         ]
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
@@ -206,10 +217,7 @@ def suggestion_search():
     input_keywords = [keywords]
     min_price = float(request.args.get("minPrice"))
     max_price = float(request.args.get("maxPrice"))
-    shade = request.args.get("shade")
-    return suggest_search(
-        input_keywords[0], min_price, max_price, input_dislikes, shade
-    )
+    return suggest_search(input_keywords[0], min_price, max_price, input_dislikes)
 
 
 @app.route("/search")

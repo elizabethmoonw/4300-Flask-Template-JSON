@@ -32,8 +32,12 @@ function answerBoxTemplate(
   ingredients,
   review,
   avg_rating,
-  summary
+  summary,
+  shade_rgb,
+  shade_name,
+  hidden
 ) {
+  // console.log("PRINTING");
   price_formatted = price.toFixed(2);
   avg_rating = avg_rating.toFixed(1);
   if (avg_rating == -1) {
@@ -52,12 +56,17 @@ function answerBoxTemplate(
         </div>
         <a href=${link} target='_blank' class='add-button'>Go to product</a>
         <p class='product-name'>${summary}</p>
+        <div class='product-info' ${hidden}>
+          <div class='product-price' ${hidden}><b ${hidden}>Closest shade match: </b></div>
+          <div class='shade-match-circle' style='background-color: ${shade_rgb}; height: 2em; width: 2em; margin-left: 1em; margin-top: -0.5em;' ${hidden}></div>
+          <div class='product-price' style='margin-left: 1em;'>${shade_name}</div>
+        </div>
         <p class='product-name'><b>Ingredients: </b>${ingredients}</h3>
         <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
-        <p class='product-name'><b>Did you like this result? </b>
+        <div class='product-name'><b>Did you like this result? </b>
           <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
           <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
-        </p>
+        </div>
       </div>
   </div>`;
 }
@@ -101,7 +110,7 @@ function selectShade(shade, color, name) {
   selected_shade = color
     .substring(color.indexOf("(") + 1, color.indexOf(")"))
     .split(" ");
-  console.log(selected_shade);
+  // console.log(selected_shade);
   selectedShade.hidden = false;
   selectedShade.style.marginTop = "1.5em";
   selectedShade.innerHTML =
@@ -378,7 +387,10 @@ function getResults() {
             formatIngredients(row.ingredients),
             review,
             row.avg_rating,
-            row.summary
+            row.summary,
+            "",
+            "",
+            "hidden"
           );
           answerBox.appendChild(tempDiv);
         });
@@ -409,25 +421,52 @@ function getResults() {
     )
       .then((response) => response.json())
       .then((data) => {
-        data.forEach((row) => {
+        if (data.length == 0) {
           let tempDiv = document.createElement("div");
-          var review = row.reviews[0];
-          if (review.length > 250) {
-            review = review.substring(0, 250) + "...";
-          }
-          tempDiv.innerHTML = answerBoxTemplate(
-            row.product,
-            row.link,
-            row.price,
-            row.img_link,
-            formatIngredients(row.ingredients),
-            review,
-            row.avg_rating,
-            row.summary
-          );
+          tempDiv.innerHTML =
+            "<h3 class='body-text' style='margin-bottom: 2em;'>No results found. Please try again.</h3>";
           answerBox.appendChild(tempDiv);
-        });
-        loader.hidden = true;
+          loader.hidden = true;
+        } else {
+          data.forEach((row) => {
+            let tempDiv = document.createElement("div");
+            var review = row.reviews[0];
+            if (review.length > 250) {
+              review = review.substring(0, 250) + "...";
+            }
+            hidden = "style='cursor: auto;'";
+            rgb_string = "";
+            console.log(row.closest_shade_rgb);
+            if (row.closest_shade_rgb.length == 0) {
+              hidden = "hidden";
+              console.log("hidden");
+            } else {
+              rgb_string =
+                "rgb(" +
+                row.closest_shade_rgb[0] +
+                " " +
+                row.closest_shade_rgb[1] +
+                " " +
+                row.closest_shade_rgb[2] +
+                ")";
+            }
+            tempDiv.innerHTML = answerBoxTemplate(
+              row.product,
+              row.link,
+              row.price,
+              row.img_link,
+              formatIngredients(row.ingredients),
+              review,
+              row.avg_rating,
+              row.summary,
+              rgb_string,
+              row.closest_shade_name,
+              hidden
+            );
+            answerBox.appendChild(tempDiv);
+          });
+          loader.hidden = true;
+        }
       });
   }
 }
