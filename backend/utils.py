@@ -274,14 +274,14 @@ def filter_shades(shade_matches, top_10_df):
         product = top_10_df["product"][ind]
         if product in shade_matches:
             raw_shade_name = shade_matches[product][1]
-            print("raw " + raw_shade_name)
+            # print("raw " + raw_shade_name)
             brand = top_10_df["brand"][ind]
-            print("brand " + brand)
+            # print("brand " + brand)
             # new_shade_names.append(shade_matches[product][1])
             new_shade_rgbs.append(shade_matches[product][0])
             try:
                 prod_name = product[product.index(brand) + len(brand) + 1 :]
-                print(prod_name)
+                # print(prod_name)
                 new_shade_name = raw_shade_name[
                     : shade_matches[product][1].index(prod_name) - 1
                 ]
@@ -300,7 +300,7 @@ def filter_shades(shade_matches, top_10_df):
             # )
     top_10_df["closest_shade_name"] = new_shade_names
     top_10_df["closest_shade_rgb"] = new_shade_rgbs
-    print(top_10_df)
+    # print(top_10_df)
     return top_10_df
 
 
