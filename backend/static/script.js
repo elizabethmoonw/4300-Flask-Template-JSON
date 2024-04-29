@@ -35,7 +35,8 @@ function answerBoxTemplate(
   summary,
   shade_rgb,
   shade_name,
-  hidden
+  hidden,
+  tags
 ) {
   // console.log("PRINTING");
   price_formatted = price.toFixed(2);
@@ -43,6 +44,11 @@ function answerBoxTemplate(
   if (avg_rating == -1) {
     avg_rating = "No reviews";
   }
+  tags_string = "<div class='tag-chips'>";
+  tags.forEach((tag) => {
+    tags_string += `<div class='tag-chip'>${tag}</div>`;
+  });
+  tags_string += "</div>";
   return `<div class='answer-item'>
       <img src=${img_link} class='product-image' style='height: 150px; width:150px; margin-top: 1em'></img>
       <div class='answer-text'>
@@ -67,8 +73,18 @@ function answerBoxTemplate(
           <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
           <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
         </div>
+        ${tags_string}
       </div>
   </div>`;
+}
+
+function tagHtml(tags) {
+  tags_string = "<div class='tag-chips'>";
+  tags.forEach((tag) => {
+    tags_string += `<div class='tag-chip'>${tag}</div>`;
+  });
+  tags_string += "</div>";
+  return tags_string;
 }
 
 function sendFocus() {
@@ -390,7 +406,8 @@ function getResults() {
             row.summary,
             "",
             "",
-            "hidden"
+            "hidden",
+            row.tags
           );
           answerBox.appendChild(tempDiv);
         });
@@ -461,7 +478,8 @@ function getResults() {
               row.summary,
               rgb_string,
               row.closest_shade_name,
-              hidden
+              hidden,
+              row.tags
             );
             answerBox.appendChild(tempDiv);
           });

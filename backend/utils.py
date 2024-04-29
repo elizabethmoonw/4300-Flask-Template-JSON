@@ -98,7 +98,6 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
          A list of n most similar products
     """
     # Filter by category
-    # products_df = create_tsne(products_df)
     if product_index == -1:
         return pd.DataFrame()
 
@@ -110,10 +109,6 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
         lambda x: oh_encoder(x, ingredient_index_map)
     )
     same_category_products = products_df[products_df["category"] == target_category]
-    # tsne_features = np.array(
-    #     [[p["X"], p["Y"]] for _, p in same_category_products.iterrows()]
-    # )
-    # target_feature = np.array([[target_product["X"], target_product["Y"]]])
     vectors = np.array(
         [p["ingredients_vector"] for _, p in same_category_products.iterrows()]
     )
@@ -121,21 +116,18 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     target_feature = [products_df.iloc[product_index]["ingredients_vector"]]
     similarities = cosine_similarity(target_feature, vectors)[0]
 
-    target_tags = products_df.iloc[product_index]["tag_vectors"]
-    tag_vectors = np.array(
-        [p["tag_vectors"] for _, p in same_category_products.iterrows()],
-        dtype=np.float32,
-    )
+    # target_tags = products_df.iloc[product_index]["tag_vectors"]
+    # tag_vectors = np.array(
+    #     [p["tag_vectors"] for _, p in same_category_products.iterrows()],
+    #     dtype=np.float32,
+    # )
 
-    tag_similarities = util.pytorch_cos_sim(target_tags, tag_vectors)
-    print(tag_similarities.shape)
-    print(similarities.shape)
-    # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
-    similarities += tag_similarities
+    # tag_similarities = util.pytorch_cos_sim(target_tags, tag_vectors)
+    # print(tag_similarities.shape)
+    # print(similarities.shape)
+    # similarities += tag_similarities
 
-    # sorted_indices = np.argsort(similarities)[::-1][1 : n_similar + 1]
     sorted_indices = np.argsort(similarities)[::-1][1:]
-    # print(sorted_indices)
     return same_category_products.iloc[sorted_indices]
 
 
