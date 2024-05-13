@@ -84,7 +84,9 @@ def reverse_product_idx(product: str, product_names: list):
     return -1
 
 
-def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
+def find_most_similar_cosine_filtered(
+    product_index, products_df, n_similar=10, product_vector=None
+):
     """
     Finds the n most similar products with cosine similarity
     ----------
@@ -100,36 +102,66 @@ def find_most_similar_cosine_filtered(product_index, products_df, n_similar=10):
     # Filter by category
     if product_index == -1:
         return pd.DataFrame()
+    if product_vector is not None:
+        target_product = products_df.iloc[product_index]
+        target_category = target_product["category"]
 
-    target_product = products_df.iloc[product_index]
-    target_category = target_product["category"]
+        ingredient_index_map = ingredient_idx(products_df)
+        products_df["ingredients_vector"] = products_df["ingredients"].apply(
+            lambda x: oh_encoder(x, ingredient_index_map)
+        )
+        same_category_products = products_df[products_df["category"] == target_category]
+        vectors = np.array(
+            [p["ingredients_vector"] for _, p in same_category_products.iterrows()]
+        )
 
-    ingredient_index_map = ingredient_idx(products_df)
-    products_df["ingredients_vector"] = products_df["ingredients"].apply(
-        lambda x: oh_encoder(x, ingredient_index_map)
-    )
-    same_category_products = products_df[products_df["category"] == target_category]
-    vectors = np.array(
-        [p["ingredients_vector"] for _, p in same_category_products.iterrows()]
-    )
+        target_feature = [product_vector]
+        similarities = cosine_similarity(target_feature, vectors)[0]
 
-    target_feature = [products_df.iloc[product_index]["ingredients_vector"]]
-    similarities = cosine_similarity(target_feature, vectors)[0]
+        target_tags = products_df.iloc[product_index]["tag_vectors"]
+        tag_vectors = np.array(
+            [p["tag_vectors"] for _, p in same_category_products.iterrows()],
+            dtype=np.float32,
+        )
 
-    target_tags = products_df.iloc[product_index]["tag_vectors"]
-    tag_vectors = np.array(
-        [p["tag_vectors"] for _, p in same_category_products.iterrows()],
-        dtype=np.float32,
-    )
+        tag_similarities = np.array(
+            util.pytorch_cos_sim(target_tags, tag_vectors)
+        ).reshape(similarities.shape)
+        # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
+        similarities = np.multiply(np.power(tag_similarities, 20), similarities)
 
-    tag_similarities = np.array(util.pytorch_cos_sim(target_tags, tag_vectors)).reshape(
-        similarities.shape
-    )
-    # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
-    similarities = np.multiply(np.power(tag_similarities, 20), similarities)
+        sorted_indices = np.argsort(similarities)[::-1][1:]
+        return same_category_products.iloc[sorted_indices]
+    else:
+        target_product = products_df.iloc[product_index]
+        target_category = target_product["category"]
 
-    sorted_indices = np.argsort(similarities)[::-1][1:]
-    return same_category_products.iloc[sorted_indices]
+        ingredient_index_map = ingredient_idx(products_df)
+        products_df["ingredients_vector"] = products_df["ingredients"].apply(
+            lambda x: oh_encoder(x, ingredient_index_map)
+        )
+        same_category_products = products_df[products_df["category"] == target_category]
+        vectors = np.array(
+            [p["ingredients_vector"] for _, p in same_category_products.iterrows()]
+        )
+
+        target_feature = [products_df.iloc[product_index]["ingredients_vector"]]
+        similarities = cosine_similarity(target_feature, vectors)[0]
+
+        target_tags = products_df.iloc[product_index]["tag_vectors"]
+        tag_vectors = np.array(
+            [p["tag_vectors"] for _, p in same_category_products.iterrows()],
+            dtype=np.float32,
+        )
+
+        tag_similarities = np.array(
+            util.pytorch_cos_sim(target_tags, tag_vectors)
+        ).reshape(similarities.shape)
+        # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
+        similarities = np.multiply(np.power(tag_similarities, 20), similarities)
+
+        sorted_indices = np.argsort(similarities)[::-1][1:]
+        return same_category_products.iloc[sorted_indices]
 
 
 def ingredient_boolean_search(products_df, disliked_ingredients):
@@ -149,7 +181,7 @@ def ingredient_boolean_search(products_df, disliked_ingredients):
 
 # The "default values are: alpha=1, beta=0.75, gamma=0.15"
 def rocchio(
-    query_vector, relevant_vectors, irrelevant_vectors, alpha=0.3, beta=0.3, gamma=0.8
+    query_vector, relevant_vectors, irrelevant_vectors, alpha=1, beta=0.75, gamma=0.15
 ):
     """
     Performs Rocchio's algorithm to update vector weights

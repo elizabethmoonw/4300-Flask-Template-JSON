@@ -13,6 +13,7 @@ from utils import (
     create_ingredient_mat,
     get_top_shades,
     filter_shades,
+    rocchio,
 )
 
 
@@ -233,6 +234,17 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
     ]
     matches_filtered_json = matches_filtered.to_json(orient="records")
     return matches_filtered_json
+
+
+def rocchio_update(product, down_voted, up_voted):
+    product_vec = product["tag_vectors"]
+    down_voted_vec = [p["tag_vectors"] for p in down_voted]
+    up_voted_vec = [p["tag_vectors"] for p in up_voted]
+    return rocchio(
+        query_vector=product_vec,
+        relevant_vectors=up_voted_vec,
+        irrelevant_vectors=down_voted_vec,
+    )
 
 
 def shade_search(product):
