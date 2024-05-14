@@ -114,13 +114,10 @@ def find_most_similar_cosine_filtered(
             dtype=np.float32,
         )
 
-        tag_similarities = np.array(
-            util.pytorch_cos_sim(product_vector, tag_vectors)
-        ).reshape(similarities.shape)
+        tag_similarities = np.array(util.pytorch_cos_sim(product_vector, tag_vectors))
         # tag_similarities = cosine_similarity(target_tags, tag_vectors)[0]
-        similarities = np.multiply(np.power(tag_similarities, 20), similarities)
 
-        sorted_indices = np.argsort(similarities)[::-1][1:]
+        sorted_indices = np.argsort(tag_similarities)[::-1][1:]
         return same_category_products.iloc[sorted_indices]
     else:
         target_product = products_df.iloc[product_index]
