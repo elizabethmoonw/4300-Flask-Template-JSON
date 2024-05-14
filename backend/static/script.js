@@ -22,6 +22,10 @@ const loader = document.querySelector("#loader");
 var dislike_chips = [];
 var filter_chips = [];
 var selected_shade = [];
+
+var downvoted = [];
+var upvoted = [];
+
 selectedShade.style.marginTop = "0em";
 
 function answerBoxTemplate(
@@ -71,11 +75,19 @@ function answerBoxTemplate(
         <p class='product-name'><b>Here's what people are saying about this product: </b>${review}</h3>
         ${tags_string}
         <div class='product-name' style='margin-top: 1em;'><b>Did you like this result? </b>
-          <button class="feedback-button"><img src='/static/images/thumbsup.svg'></img></button>
-          <button class="feedback-button"><img src='/static/images/thumbsdown.svg'></img></button>
+          <button class="feedback-button" onclick="upvoteProduct('${product}')"><img src='/static/images/thumbsup.svg'></img></button>
+          <button class="feedback-button" onclick="downvoteProduct('${product}')"><img src='/static/images/thumbsdown.svg'></img></button>
         </div>
       </div>
   </div>`;
+}
+
+function upvoteProduct(product) {
+  upvoted.push(product);
+}
+
+function downvoteProduct(product) {
+  downvoted.push(product);
 }
 
 function tagHtml(tags) {
@@ -363,7 +375,11 @@ function formatIngredients(ingredients) {
   return ingred_string;
 }
 
-function getResults() {
+function getResults(refine) {
+  if (!refine) {
+    upvoted = [];
+    downvoted = [];
+  }
   if (productInputBox.value == "") {
     answerBox.innerHTML = "";
     priceTokens = priceSlider.value.split(" ");
@@ -478,6 +494,8 @@ function getResults() {
           results.innerHTML =
             "<h3 style='margin-bottom: 1em;'>Here are some similar products:</h3>";
           answerBox.appendChild(results);
+          // console.log(upvoted);
+          // console.log(downvoted);
         });
       });
     fetch(
@@ -489,6 +507,9 @@ function getResults() {
           minPrice: minPrice,
           maxPrice: maxPrice,
           shade: selected_shade,
+          upvoted: upvoted,
+          downvoted: downvoted,
+          refine: refine,
         }).toString()
     )
       .then((response) => response.json())

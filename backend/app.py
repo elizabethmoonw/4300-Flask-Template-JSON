@@ -91,16 +91,55 @@ def csv_search(query):
     return matches_filtered_json
 
 
-def results_search(query, min_price, max_price, product, dislikes, shade):
+def results_search(
+    query,
+    min_price,
+    max_price,
+    product,
+    dislikes,
+    shade,
+    upvoted=[],
+    downvoted=[],
+    refine=False,
+):
+    # print(upvoted)
+    # print(downvoted)
     # matches = []
     # matches = df[(df["product"].str.lower().str.contains(query.lower()))]
     # print("before matches")
     # print(len(df))
     # print(len(ingred_filtered))
     # print(product)
+    product_vec = None
+    if refine:
+        # print("LSDkfjsd")
+        if len(upvoted) != 0:
+            upvoted_list = upvoted.split(",")
+            # print(upvoted_list)
+        else:
+            upvoted_list = []
+        if len(downvoted) != 0:
+            downvoted_list = downvoted.split(",")
+            # print(downvoted_list)
+        else:
+            downvoted_list = []
+        product_index = reverse_product_idx(product, product_names)
+        target_product = df.iloc[product_index]
+        # print("prod vec length " + str(len(target_product["tag_vectors"])))
+        product_vec = np.asarray(target_product["tag_vectors"], dtype=np.float32)
+        product_vec = rocchio_update(product_vec, downvoted_list, upvoted_list)
+
     best_matches = find_most_similar_cosine_filtered(
-        reverse_product_idx(product, product_names), df
+        reverse_product_idx(product, product_names),
+        df,
+        n_similar=10,
+        product_vector=product_vec,
     )
+
+    # else:
+    #     best_matches = find_most_similar_cosine_filtered(
+    #         reverse_product_idx(product, product_names), df
+    #     )
 
     if best_matches.size == 0:
         return best_matches.to_json(orient="records")
@@ -153,7 +192,15 @@ def dislike_search(query):
     return matches_filtered_json
 
 
-def suggest_search(input_keyword, min_price, max_price, input_dislikes):
+def suggest_search(
+    input_keyword,
+    min_price,
+    max_price,
+    input_dislikes,
+    # upvoted=[],
+    # downvoted=[],
+    # refine=False,
+):
     category = ""
     makeup_types = [
         "foundation",
@@ -191,7 +238,20 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
         if cat in input_keyword:
             category = cat
 
+    # product_vec = None
+    # if refine:
+    #     product_vec = np.zeros((1, 768))
+    #     product_vec = rocchio_update(product_vec, downvoted, upvoted)
+
     matches = df
+
+    # matches = find_most_similar_cosine_filtered(
+    #     reverse_product_idx(product, product_names),
+    #     df,
+    #     n_similar=10,
+    #     product_vector=product_vec,
+    # )
+
     if category != "":
         matches = df.loc[matches["category"] == category]
 
@@ -236,10 +296,33 @@ def suggest_search(input_keyword, min_price, max_price, input_dislikes):
     return matches_filtered_json
 
 
-def rocchio_update(product, down_voted, up_voted):
-    product_vec = product["tag_vectors"]
-    down_voted_vec = [p["tag_vectors"] for p in down_voted]
-    up_voted_vec = [p["tag_vectors"] for p in up_voted]
+def rocchio_update(product_vec, down_voted, up_voted):
+    # if product is not None:
+    #     product_vec = product["tag_vectors"]
+    # else:
+    #     product_vec = np.zeros((1, 768))
+    # print("product vec shape " + str(product_vec.shape))
+    # down_voted_vec = [np.zeros((384))]
+    down_voted_vec = []
+    for p in down_voted:
+        prod = reverse_product_idx(p, product_names)
+        # print(len(prod["tag_vectors"]))
+        down_voted_vec.append(df.iloc[prod]["tag_vectors"])
+    down_voted_vec = np.array(down_voted_vec, dtype=np.float32)
+
+    # up_voted_vec = np.zeros((384))
+    up_voted_vec = []
+    for p in up_voted:
+        prod = reverse_product_idx(p, product_names)
+        up_voted_vec.append(df.iloc[prod]["tag_vectors"])
+    up_voted_vec = np.array(up_voted_vec, dtype=np.float32)
+    # up_voted_vec += df.iloc[prod]["tag_vectors"]
+    # down_voted_vec = [p["tag_vectors"] for p in down_voted]
+    # up_voted_vec = [p["tag_vectors"] for p in up_voted]
+    # print("query vec shape " + str(product_vec.shape))
+    # print("up vec shape " + str(up_voted_vec.shape))
+    # print("down vec shape " + str(down_voted_vec.shape))
+
     return rocchio(
         query_vector=product_vec,
         relevant_vectors=up_voted_vec,
@@ -320,8 +403,23 @@ def filter_search():
     max_price = float(request.args.get("maxPrice"))
     product = request.args.get("product")
     shade = request.args.get("shade")
+    refine_str = request.args.get("refine")
+    if refine_str == "true":
+        refine = True
+    else:
+        refine = False
+    upvoted = request.args.get("upvoted")
+    downvoted = request.args.get("downvoted")
     return results_search(
-        input_keywords[0], min_price, max_price, product, input_dislikes, shade
+        input_keywords[0],
+        min_price,
+        max_price,
+        product,
+        input_dislikes,
+        shade,
+        upvoted,
+        downvoted,
+        refine,
     )
 
 
@@ -352,6 +450,11 @@ def searchIngredients():
 def searchShades():
     text = request.args.get("title")
     return shade_search(text)
+
+
+# @app.route("/refine_filter")
+# def refineSearch():
+#     text = request.args.get
 
 
 if "DB_NAME" not in os.environ:
